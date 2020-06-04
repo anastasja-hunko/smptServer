@@ -1,67 +1,43 @@
 package main
 
 import (
-	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal"
 	"log"
-
-	//"log"
-	"time"
 )
 
 func main() {
 	config := internal.NewConfig()
+
 	server := internal.New(config)
 
-	ticker := time.NewTicker(5 * time.Second)
-	done := make(chan bool)
+	log.Fatal(server.Start())
 
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			case t := <-ticker.C:
-				fmt.Println("Tick at", t)
-				if !server.IsAlive() {
-					log.Println("is not work")
-					err := server.Start()
-					if err != nil {
-						fmt.Println(err)
-					}
-				} else {
-					fmt.Println("it works")
-				}
-			}
-		}
-	}()
-
-	time.Sleep(time.Minute)
-	ticker.Stop()
-	done <- true
-	fmt.Println("Ticker stopped")
-
+	//ticker := time.NewTicker(20 * time.Second)
+	//done := make(chan bool)
+	//
 	//go func() {
 	//	for {
 	//		select {
+	//		case <-done:
+	//			return
 	//		case t := <-ticker.C:
-	//			fmt.Println("Tick at", t)
-	//			//if !server.IsAlive() {
-	//			//	log.Println("is not work")
-	//			//	err := server.Start()
-	//			//	if err != nil {
-	//			//		log.Fatal(err)
-	//			//	}
-	//			//} else {
-	//			//	log.Println("it works")
-	//			//}
+	//			_, err := http.Get("localhost:" + config.Port)
+	//
+	//			if err != nil {
+	//				log.Println("it doen't work at:", t)
+	//
+	//				go server.Start()
+	//
+	//			} else {
+	//				log.Println("it works at:", t)
+	//			}
 	//		}
-	//
 	//	}
-	//
 	//}()
-	//init config, and server. Then start server
-
-	//sessionStore := sessions.NewCookieStore([]byte("very-secret-key"))
-
+	//
+	//time.Sleep(5 * time.Minute)
+	//ticker.Stop()
+	//done <- true
+	//fmt.Println("Ticker stopped")
+	//os.Exit(0)
 }

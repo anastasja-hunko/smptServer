@@ -49,7 +49,7 @@ func (c *Database) User() *UserCol {
 }
 
 //access to logCol
-func (c *Database) Document() *LogCol {
+func (c *Database) Log() *LogCol {
 	if c.logCol == nil {
 		c.logCol = c.NewLogCol()
 	}

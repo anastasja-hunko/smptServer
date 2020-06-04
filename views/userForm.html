@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h3>{{.}}</h3>
+<hr>
+
+<a class="navbar-brand" href="/">Index</a>
+
+<form method="POST">
+    <span class="glyphicon glyphicon-trash"></span><label for="login">Login:</label><br/>
+    <input class="form-control" type="text" name="login" id="login"><br/>
+
+    {{if eq .  "Change password"}}
+        <label for="password">New password:</label><br/>
+    {{else}}
+        <label for="password">Password:</label><br/>
+    {{end}}
+    <input class="form-control" type="password" name="password" id="password"><br/>
+    <input type="submit">
+</form>
+</body>
+</html>
