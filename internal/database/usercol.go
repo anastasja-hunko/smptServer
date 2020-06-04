@@ -13,15 +13,19 @@ type UserCol struct {
 }
 
 func (db *Database) NewUserCol() *UserCol {
+
 	return &UserCol{col: db.db.Collection(db.config.UserColName)}
+
 }
 
 func (uc *UserCol) Create(u *model.User) error {
-	if err := u.BeforeCreate(); err != nil {
+	err := u.BeforeCreate()
+
+	if err != nil {
 		return err
 	}
 
-	_, err := uc.col.InsertOne(context.TODO(), u)
+	_, err = uc.col.InsertOne(context.TODO(), u)
 
 	if err != nil {
 		return err
@@ -32,7 +36,9 @@ func (uc *UserCol) Create(u *model.User) error {
 
 func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
 	filter := bson.D{primitive.E{Key: "login", Value: login}}
+
 	var user model.User
+
 	err := uc.col.FindOne(context.TODO(), filter).Decode(&user)
 
 	if err != nil {
@@ -48,8 +54,11 @@ func (uc *UserCol) Update(u *model.User) error {
 	u.BeforeCreate()
 
 	update := bson.D{
+
 		primitive.E{Key: "$set", Value: bson.D{
+
 			primitive.E{Key: "login", Value: u.Login},
+
 			primitive.E{Key: "password", Value: u.Password},
 		}},
 	}
@@ -68,8 +77,11 @@ func (uc *UserCol) FindAll() ([]*model.User, error) {
 	var results []*model.User
 
 	for cur.Next(context.TODO()) {
+
 		var elem model.User
+
 		err := cur.Decode(&elem)
+
 		if err != nil {
 			return results, err
 		}
@@ -91,6 +103,8 @@ func (uc *UserCol) FindAll() ([]*model.User, error) {
 
 func (uc *UserCol) Delete(login string) error {
 	filter := bson.D{primitive.E{Key: "login", Value: login}}
+
 	_, err := uc.col.DeleteOne(context.TODO(), filter)
+
 	return err
 }

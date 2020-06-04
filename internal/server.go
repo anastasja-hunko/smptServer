@@ -45,9 +45,8 @@ func (s *Server) Start() error {
 	}()
 
 	s.writeOKMessage("starting server...", "")
-	err := http.ListenAndServe(s.config.Port, s.router)
 
-	return err
+	return http.ListenAndServe(s.config.Port, s.router)
 }
 
 func (s *Server) configureLogger() error {
@@ -65,19 +64,27 @@ func (s *Server) configureLogger() error {
 func (s *Server) configureRouter() {
 
 	indexHandler := NewIndexHandler(s)
+
 	s.router.HandleFunc("/", indexHandler.indexPage).Methods("GET")
 
 	sendHandler := NewSendHandler(s)
+
 	s.router.HandleFunc("/sendMail", sendHandler.sendHandler)
 
 	userHandler := NewUserHandler(s)
+
 	s.router.HandleFunc("/createUser", userHandler.CreateUser)
+
 	s.router.HandleFunc("/changePassword", userHandler.changePassword)
+
 	s.router.HandleFunc("/showUsers", userHandler.showUsers)
+
 	s.router.HandleFunc("/delete", userHandler.deleteUser)
 
 	autorHandler := NewAutorHandler(s)
+
 	s.router.HandleFunc("/authorize", autorHandler.authorizeHandler)
+
 	s.router.HandleFunc("/logout", autorHandler.Logout)
 }
 

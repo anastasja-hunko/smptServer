@@ -12,7 +12,7 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		Port:     ":8585",
+		Port:     ":8283",
 		LogLevel: "debug",
 		DbConfig: database.NewConfig(),
 	}

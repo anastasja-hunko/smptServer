@@ -38,6 +38,7 @@ func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request)
 			h.serv.writeErrorLog(err)
 
 			rw.WriteHeader(http.StatusBadRequest)
+
 			return
 		}
 
@@ -65,8 +66,12 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 
 	expirationTime := time.Now().Add(5 * time.Minute)
 
-	claims := &Claims{Login: user.Login,
-		StandardClaims: jwt.StandardClaims{ExpiresAt: expirationTime.Unix()}}
+	claims := &Claims{
+		Login: user.Login,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -85,7 +90,10 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 	return nil
 }
 
+//logout handler. If you're authorized, you see "quit" link on the index page.
+//Results: Get: clean cookie and redirect
 func (h *autorHandler) Logout(rw http.ResponseWriter, r *http.Request) {
+
 	http.SetCookie(rw, &http.Cookie{
 		Name:    "token",
 		Value:   "",
@@ -93,5 +101,6 @@ func (h *autorHandler) Logout(rw http.ResponseWriter, r *http.Request) {
 	})
 
 	h.serv.writeOKMessage("Logout", "")
+
 	http.Redirect(rw, r, "/", 302)
 }

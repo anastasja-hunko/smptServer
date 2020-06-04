@@ -10,6 +10,7 @@ type User struct {
 //hash user's password before create to db
 func (u *User) BeforeCreate() error {
 	if len(u.Password) > 0 {
+
 		enc, err := hashPassword(u.Password)
 
 		if err != nil {
@@ -40,5 +41,6 @@ func hashPassword(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(bytes), nil
 }

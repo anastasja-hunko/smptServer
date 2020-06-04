@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal"
 	"log"
+	"net/http"
+	"os"
+	"time"
 )
 
 func main() {
@@ -10,34 +14,44 @@ func main() {
 
 	server := internal.New(config)
 
-	log.Fatal(server.Start())
+	ticker := time.NewTicker(20 * time.Second)
 
-	//ticker := time.NewTicker(20 * time.Second)
-	//done := make(chan bool)
-	//
-	//go func() {
-	//	for {
-	//		select {
-	//		case <-done:
-	//			return
-	//		case t := <-ticker.C:
-	//			_, err := http.Get("localhost:" + config.Port)
-	//
-	//			if err != nil {
-	//				log.Println("it doen't work at:", t)
-	//
-	//				go server.Start()
-	//
-	//			} else {
-	//				log.Println("it works at:", t)
-	//			}
-	//		}
-	//	}
-	//}()
-	//
-	//time.Sleep(5 * time.Minute)
-	//ticker.Stop()
-	//done <- true
-	//fmt.Println("Ticker stopped")
-	//os.Exit(0)
+	done := make(chan bool)
+
+	go func() {
+		for {
+			select {
+
+			case <-done:
+				return
+
+			case t := <-ticker.C:
+				_, err := http.Get("http://127.0.0.1:" + config.Port)
+
+				if err != nil {
+					fmt.Println("it doen't work at:", t)
+
+					go func() {
+						err := server.Start()
+
+						if err != nil {
+							log.Fatal(err)
+						}
+
+					}()
+
+				} else {
+					fmt.Println("it works at:", t)
+				}
+			}
+		}
+	}()
+
+	time.Sleep(20 * time.Minute)
+
+	ticker.Stop()
+
+	done <- true
+
+	os.Exit(0)
 }

@@ -11,7 +11,9 @@ type LogCol struct {
 }
 
 func (db *Database) NewLogCol() *LogCol {
+
 	return &LogCol{col: db.db.Collection(db.config.LogColName)}
+
 }
 
 func (dc *LogCol) Create(l *model.Log, done chan bool) error {
@@ -21,10 +23,14 @@ func (dc *LogCol) Create(l *model.Log, done chan bool) error {
 	_, err := dc.col.InsertOne(context.TODO(), l)
 
 	if err != nil {
+
 		done <- false
+
 		return err
+
 	}
 
 	done <- true
+
 	return nil
 }
