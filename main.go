@@ -14,7 +14,7 @@ func main() {
 
 	server := internal.New(config)
 
-	ticker := time.NewTicker(20 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 
 	done := make(chan bool)
 
