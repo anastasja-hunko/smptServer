@@ -3,7 +3,7 @@ package model
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
-	Login    string `json:"login" bson:"login"`
+	Login    string `json:"login" bson:"_id"`
 	Password string `json:"password" bson:"password"`
 }
 

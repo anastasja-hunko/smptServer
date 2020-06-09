@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	db "github.com/anastasja-hunko/smptServer/internal/database"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/gorilla/mux"
@@ -122,16 +121,12 @@ func (s *Server) Respond(rw http.ResponseWriter, data interface{}, page string) 
 }
 
 func (s *Server) writeLog(logMessage *model.Log) {
-	done := make(chan bool)
 
-	go func() {
-		err := s.DB.Log().Create(logMessage, done)
-		if err != nil {
-			s.Logger.Error(err)
-		}
-	}()
+	err := s.DB.LogCol.Create(logMessage)
+	if err != nil {
+		s.Logger.Error(err)
+	}
 
-	fmt.Println(<-done)
 }
 
 func (s *Server) writeErrorLog(err error) {

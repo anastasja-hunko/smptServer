@@ -16,7 +16,7 @@ func (db *Database) NewLogCol() *LogCol {
 
 }
 
-func (dc *LogCol) Create(l *model.Log, done chan bool) error {
+func (dc *LogCol) Create(l *model.Log) error {
 
 	l.BeforeCreate()
 
@@ -24,13 +24,9 @@ func (dc *LogCol) Create(l *model.Log, done chan bool) error {
 
 	if err != nil {
 
-		done <- false
-
 		return err
 
 	}
-
-	done <- true
 
 	return nil
 }

@@ -60,7 +60,7 @@ set on a client, it is sent along with every request henceforth.
 
 func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 
-	user, err := h.serv.DB.User().FindByLogin(u.Login)
+	user, err := h.serv.DB.UserCol.FindByLogin(u.Login)
 
 	if err != nil || !user.ComparePasswords(u.Password) {
 		return errors.New("incorrect password or login")

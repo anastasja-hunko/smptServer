@@ -9,8 +9,8 @@ import (
 type Database struct {
 	config  *Config
 	db      *mongo.Database
-	userCol *UserCol
-	logCol  *LogCol
+	UserCol *UserCol
+	LogCol  *LogCol
 }
 
 func New(config *Config) *Database {
@@ -27,10 +27,9 @@ func (c *Database) Open() error {
 		return err
 	}
 
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		return err
-	}
+	c.UserCol = c.NewUserCol()
+
+	c.LogCol = c.NewLogCol()
 
 	c.db = client.Database(c.config.DatabaseName)
 
@@ -42,28 +41,4 @@ func (c *Database) Close() error {
 
 	return c.db.Client().Disconnect(context.TODO())
 
-}
-
-//access to userCol
-func (c *Database) User() *UserCol {
-
-	if c.userCol == nil {
-
-		c.userCol = c.NewUserCol()
-
-	}
-
-	return c.userCol
-}
-
-//access to logCol
-func (c *Database) Log() *LogCol {
-
-	if c.logCol == nil {
-
-		c.logCol = c.NewLogCol()
-
-	}
-
-	return c.logCol
 }

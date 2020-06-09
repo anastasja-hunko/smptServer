@@ -51,13 +51,13 @@ func (h *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 func (h *userHandler) registerUser(u *model.User) error {
 
-	user, _ := h.serv.DB.User().FindByLogin(u.Login)
+	user, _ := h.serv.DB.UserCol.FindByLogin(u.Login)
 
 	if user != nil {
 		return errors.New("user's already existed with login:" + u.Login)
 	}
 
-	err := h.serv.DB.User().Create(u)
+	err := h.serv.DB.UserCol.Create(u)
 
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (h *userHandler) changePassword(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 		}
 
-		err := h.serv.DB.User().Update(user)
+		err := h.serv.DB.UserCol.Update(user)
 
 		if err != nil {
 
@@ -104,7 +104,7 @@ func (h *userHandler) changePassword(w http.ResponseWriter, r *http.Request) {
 //Results: Get: show all users in the table
 func (h *userHandler) showUsers(w http.ResponseWriter, r *http.Request) {
 
-	users, err := h.serv.DB.User().FindAll()
+	users, err := h.serv.DB.UserCol.FindAll()
 
 	if err != nil {
 
@@ -124,7 +124,7 @@ func (h *userHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	login := fmt.Sprint(r.URL.Query().Get("login"))
 
-	err := h.serv.DB.User().Delete(login)
+	err := h.serv.DB.UserCol.Delete(login)
 
 	if err != nil {
 
