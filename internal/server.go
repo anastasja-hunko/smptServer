@@ -1,11 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	db "github.com/anastasja-hunko/smptServer/internal/database"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
 	"html/template"
 	"net/http"
 )
@@ -139,15 +139,6 @@ func (s *Server) writeErrorLog(err error) {
 	s.Logger.Error(err)
 
 	logMessage := model.NewLog(err.Error(), "")
-
-	s.writeLog(logMessage)
-}
-
-func (s *Server) writeTextErrorLog(err string) {
-
-	s.Logger.Error(err)
-
-	logMessage := model.NewLog(err, "")
 
 	s.writeLog(logMessage)
 }

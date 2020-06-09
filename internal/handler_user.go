@@ -116,8 +116,6 @@ func (h *userHandler) showUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.serv.Respond(w, users, "views/users.html")
-
-	return
 }
 
 //delete user handler. If you chose the link 'delete an user' in user list. See showUsers().

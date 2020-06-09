@@ -52,9 +52,12 @@ func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
 
 func (uc *UserCol) Update(u *model.User) error {
 
-	filter := bson.D{primitive.E{Key: "login", Value: u.Login}}
+	err := u.BeforeCreate()
+	if err != nil {
+		return err
+	}
 
-	u.BeforeCreate()
+	filter := bson.D{primitive.E{Key: "login", Value: u.Login}}
 
 	update := bson.D{
 
@@ -65,7 +68,7 @@ func (uc *UserCol) Update(u *model.User) error {
 			primitive.E{Key: "password", Value: u.Password},
 		}},
 	}
-	_, err := uc.col.UpdateOne(context.TODO(), filter, update)
+	_, err = uc.col.UpdateOne(context.TODO(), filter, update)
 
 	return err
 }
