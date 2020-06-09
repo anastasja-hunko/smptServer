@@ -11,6 +11,7 @@ type Config struct {
 }
 
 func NewConfig() *Config {
+
 	return &Config{
 		Port:     ":8283",
 		LogLevel: "debug",

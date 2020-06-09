@@ -17,5 +17,6 @@ func NewLog(text string, login string) *Log {
 }
 
 func (l *Log) BeforeCreate() {
+
 	l.Time = time.Now().Format("Mon Jan _2 15:04:05 2006")
 }

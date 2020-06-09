@@ -19,16 +19,15 @@ func New(config *Config) *Database {
 
 //connect to db and ping it
 func (c *Database) Open() error {
+
 	clientOptions := options.Client().ApplyURI(c.config.DatabaseURL)
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
-
 	if err != nil {
 		return err
 	}
 
 	err = client.Ping(context.TODO(), nil)
-
 	if err != nil {
 		return err
 	}

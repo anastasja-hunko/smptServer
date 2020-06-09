@@ -18,6 +18,7 @@ type Server struct {
 }
 
 func New(config *Config) *Server {
+
 	return &Server{
 		config: config,
 		Logger: logrus.New(),
@@ -50,8 +51,8 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) configureLogger() error {
-	level, err := logrus.ParseLevel(s.config.LogLevel)
 
+	level, err := logrus.ParseLevel(s.config.LogLevel)
 	if err != nil {
 		return err
 	}
@@ -90,6 +91,7 @@ func (s *Server) configureRouter() {
 
 //configure database with config
 func (s *Server) configureDatabase() error {
+
 	dbase := db.New(s.config.DbConfig)
 
 	err := dbase.Open()
@@ -104,14 +106,16 @@ func (s *Server) configureDatabase() error {
 
 //execute html template
 func executeTemplate(page string, w http.ResponseWriter, data interface{}) error {
+
 	tmpl := template.Must(template.ParseFiles(page))
+
 	return tmpl.Execute(w, data)
 }
 
 //action's respond when everything is OK
 func (s *Server) Respond(rw http.ResponseWriter, data interface{}, page string) {
-	err := executeTemplate(page, rw, data)
 
+	err := executeTemplate(page, rw, data)
 	if err != nil {
 		s.writeErrorLog(err)
 	}
@@ -131,6 +135,7 @@ func (s *Server) writeLog(logMessage *model.Log) {
 }
 
 func (s *Server) writeErrorLog(err error) {
+
 	s.Logger.Error(err)
 
 	logMessage := model.NewLog(err.Error(), "")
@@ -139,6 +144,7 @@ func (s *Server) writeErrorLog(err error) {
 }
 
 func (s *Server) writeTextErrorLog(err string) {
+
 	s.Logger.Error(err)
 
 	logMessage := model.NewLog(err, "")
@@ -147,6 +153,7 @@ func (s *Server) writeTextErrorLog(err string) {
 }
 
 func (s *Server) writeOKMessage(message string, login string) {
+
 	s.Logger.Info(message)
 
 	logMessage := model.NewLog(message, login)

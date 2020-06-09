@@ -41,6 +41,7 @@ func (h *sendHandler) sendHandler(w http.ResponseWriter, r *http.Request) {
 		err := smtp.SendMail(addr, auth, cfg.SmtpAddress, []string{m.AddressTo}, []byte(msg))
 
 		if err != nil {
+
 			h.serv.writeErrorLog(err)
 
 			w.WriteHeader(http.StatusBadRequest)

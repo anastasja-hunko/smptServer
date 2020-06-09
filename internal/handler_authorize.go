@@ -25,6 +25,7 @@ func NewAutorHandler(serv *Server) *autorHandler {
 }
 
 func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request) {
+
 	if r.Method == http.MethodPost {
 
 		u := &model.User{
@@ -58,6 +59,7 @@ set on a client, it is sent along with every request henceforth.
 */
 
 func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
+
 	user, err := h.serv.DB.User().FindByLogin(u.Login)
 
 	if err != nil || !user.ComparePasswords(u.Password) {
@@ -76,7 +78,6 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString(jwtKey)
-
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ type User struct {
 
 //hash user's password before create to db
 func (u *User) BeforeCreate() error {
+
 	if len(u.Password) > 0 {
 
 		enc, err := hashPassword(u.Password)
@@ -29,6 +30,7 @@ func (u *User) ComparePasswords(password string) bool {
 }
 
 func checkPasswordHash(hash, password string) bool {
+
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 
 	return err == nil
@@ -36,8 +38,8 @@ func checkPasswordHash(hash, password string) bool {
 
 //hash password
 func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return "", err
 	}

@@ -17,6 +17,7 @@ func NewIndexHandler(serv *Server) *indexHandler {
 }
 
 func (h *indexHandler) indexPage(w http.ResponseWriter, r *http.Request) {
+
 	login, err := getLoginFromClaimsFromCookie(r)
 
 	if err != nil {
@@ -43,6 +44,7 @@ func (h *indexHandler) indexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func getLoginFromClaimsFromCookie(r *http.Request) (string, error) {
+
 	c, err := r.Cookie("token")
 
 	if err != nil {
