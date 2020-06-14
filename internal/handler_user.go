@@ -78,7 +78,7 @@ func (h *userHandler) changePassword(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 		}
 
-		err := h.serv.DB.UserCol.Update(user)
+		err := h.serv.DB.UserCol.UpdatePassword(user)
 
 		if err != nil {
 
@@ -124,7 +124,7 @@ func (h *userHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	login := fmt.Sprint(r.URL.Query().Get("login"))
 
-	err := h.serv.DB.UserCol.Delete(login)
+	err := h.serv.DB.UserCol.UpdateActive(login)
 
 	if err != nil {
 

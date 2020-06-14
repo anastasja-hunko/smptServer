@@ -28,25 +28,32 @@ func New(config *Config) *Server {
 //start a server
 func (s *Server) Start() error {
 
-	if err := s.configureLogger(); err != nil {
+	err := s.configureLogger()
+	if err != nil {
 		return err
 	}
 
 	s.configureRouter()
 
-	if err := s.configureDatabase(); err != nil {
+	err = s.configureDatabase()
+
+	if err != nil {
 		return err
 	}
-
-	defer func() {
-		if err := s.DB.Close(); err != nil {
-			s.Logger.Error("can't close db connection...")
-		}
-	}()
 
 	s.writeOKMessage("starting server...", "")
 
 	return http.ListenAndServe(s.config.Port, s.router)
+}
+
+func (s *Server) Disconnect() {
+
+	err := s.DB.Close()
+
+	if err != nil {
+		s.Logger.Error("can't close db connection...")
+	}
+
 }
 
 func (s *Server) configureLogger() error {

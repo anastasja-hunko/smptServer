@@ -50,7 +50,7 @@ func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
 	return &user, nil
 }
 
-func (uc *UserCol) Update(u *model.User) error {
+func (uc *UserCol) UpdatePassword(u *model.User) error {
 
 	err := u.BeforeCreate()
 	if err != nil {
@@ -66,7 +66,22 @@ func (uc *UserCol) Update(u *model.User) error {
 			primitive.E{Key: "password", Value: u.Password},
 		}},
 	}
-	_, err = uc.col.UpdateOne(context.TODO(), filter, update)
+
+	return uc.update(filter, update)
+}
+
+func (uc *UserCol) UpdateActive(login string) error {
+
+	filter := bson.D{primitive.E{Key: "_id", Value: login}}
+
+	_, err := uc.col.DeleteOne(context.TODO(), filter)
+
+	return err
+}
+
+func (uc *UserCol) update(filter primitive.D, update primitive.D) error {
+
+	_, err := uc.col.UpdateOne(context.TODO(), filter, update)
 
 	return err
 }
@@ -101,13 +116,4 @@ func (uc *UserCol) FindAll() ([]*model.User, error) {
 	cur.Close(context.TODO())
 
 	return results, nil
-}
-
-func (uc *UserCol) Delete(login string) error {
-
-	filter := bson.D{primitive.E{Key: "_id", Value: login}}
-
-	_, err := uc.col.DeleteOne(context.TODO(), filter)
-
-	return err
 }

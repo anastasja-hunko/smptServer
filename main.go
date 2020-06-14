@@ -3,56 +3,44 @@ package main
 import (
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal"
-	"log"
 	"net/http"
 	"time"
 )
 
-func main() {
+func serverCheck(port string) {
 
+	ticker := time.NewTicker(5 * time.Second)
+
+	for t := range ticker.C {
+
+		_, err := http.Get("http://127.0.0.1" + port)
+
+		if err != nil {
+
+			fmt.Println("it doesn't work at:", t)
+
+		} else {
+
+			fmt.Println("it works at:", t)
+
+		}
+
+	}
+
+	time.Sleep(30 * time.Second)
+
+	ticker.Stop()
+
+}
+
+func main() {
 	config := internal.NewConfig()
 
 	server := internal.New(config)
 
-	ticker := time.NewTicker(5 * time.Second)
+	go server.Start()
 
-	done := make(chan bool)
+	go serverCheck(config.Port)
 
-	go func() {
-
-		for {
-			select {
-
-			case <-done:
-				return
-
-			case t := <-ticker.C:
-
-				_, err := http.Get("http://127.0.0.1:" + config.Port)
-
-				if err != nil {
-					fmt.Println("it doen't work at:", t)
-
-					go func() {
-
-						err := server.Start()
-						if err != nil {
-							log.Fatal(err)
-						}
-
-					}()
-
-				} else {
-					fmt.Println("it works at:", t)
-				}
-			}
-		}
-	}()
-
-	time.Sleep(20 * time.Minute)
-
-	ticker.Stop()
-
-	done <- true
-
+	select {}
 }
