@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -51,6 +52,16 @@ func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
 }
 
 func (uc *UserCol) UpdatePassword(u *model.User) error {
+
+	user, _ := uc.FindByLogin(u.Login)
+
+	equal := user.ComparePasswords(u.Password)
+
+	if equal {
+
+		return errors.New("passwords are equals")
+
+	}
 
 	err := u.BeforeCreate()
 	if err != nil {
