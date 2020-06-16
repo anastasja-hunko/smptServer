@@ -5,6 +5,7 @@ import (
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,21 @@ type autorHandler struct {
 
 func NewAutorHandler(serv *Server) *autorHandler {
 	return &autorHandler{serv: serv}
+}
+
+func (h *autorHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+
+	if strings.Contains(r.URL.String(), "authorize") {
+
+		h.authorizeHandler(rw, r)
+
+	}
+
+	if strings.Contains(r.URL.String(), "logout") {
+
+		h.logout(rw, r)
+
+	}
 }
 
 func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request) {
@@ -93,7 +109,7 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 
 //logout handler. If you're authorized, you see "quit" link on the index page.
 //Results: Get: clean cookie and redirect
-func (h *autorHandler) Logout(rw http.ResponseWriter, r *http.Request) {
+func (h *autorHandler) logout(rw http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:    "token",

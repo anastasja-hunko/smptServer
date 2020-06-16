@@ -72,27 +72,27 @@ func (s *Server) configureRouter() {
 
 	indexHandler := NewIndexHandler(s)
 
-	s.router.HandleFunc("/", indexHandler.indexPage).Methods("GET")
+	s.router.Handle("/", indexHandler).Methods("GET")
 
 	sendHandler := NewSendHandler(s)
 
-	s.router.HandleFunc("/sendMail", sendHandler.sendHandler)
+	s.router.Handle("/sendMail", sendHandler)
 
 	userHandler := NewUserHandler(s)
 
-	s.router.HandleFunc("/createUser", userHandler.CreateUser)
+	s.router.Handle("/createUser", userHandler)
 
-	s.router.HandleFunc("/changePassword", userHandler.changePassword)
+	s.router.Handle("/changePassword", userHandler)
 
-	s.router.HandleFunc("/showUsers", userHandler.showUsers)
+	s.router.Handle("/showUsers", userHandler)
 
-	s.router.HandleFunc("/delete", userHandler.deleteUser)
+	s.router.Handle("/delete", userHandler)
 
 	autorHandler := NewAutorHandler(s)
 
-	s.router.HandleFunc("/authorize", autorHandler.authorizeHandler)
+	s.router.Handle("/authorize", autorHandler)
 
-	s.router.HandleFunc("/logout", autorHandler.Logout)
+	s.router.Handle("/logout", autorHandler)
 }
 
 //configure database with config

@@ -1,2 +1,9 @@
 GET / HTTP/1.1
 Host: localhost:8283
+
+###
+###create user with empty params
+###create user with params
+###delete user
+###changePassword
+###showUsers

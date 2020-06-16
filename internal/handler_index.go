@@ -16,7 +16,7 @@ func NewIndexHandler(serv *Server) *indexHandler {
 
 }
 
-func (h *indexHandler) indexPage(w http.ResponseWriter, r *http.Request) {
+func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	login, err := getLoginFromClaimsFromCookie(r)
 

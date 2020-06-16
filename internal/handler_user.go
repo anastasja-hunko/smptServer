@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"net/http"
+	"strings"
 )
 
 type userHandler struct {
@@ -15,10 +16,37 @@ func NewUserHandler(s *Server) *userHandler {
 	return &userHandler{serv: s}
 }
 
+func (h *userHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+
+	if strings.Contains(r.URL.String(), "createUser") {
+
+		h.createUser(rw, r)
+
+	}
+
+	if strings.Contains(r.URL.String(), "changePassword") {
+
+		h.changePassword(rw, r)
+
+	}
+
+	if strings.Contains(r.URL.String(), "showUsers") {
+
+		h.showUsers(rw, r)
+
+	}
+
+	if strings.Contains(r.URL.String(), "delete") {
+
+		h.deleteUser(rw, r)
+
+	}
+}
+
 //create user handler. If you're not authorized, you see "create a user" link on the index page.
 //Results: Get: show form for data input
 //		   Post: create user and save it in db, and redirect to index page
-func (h *userHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
+func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 

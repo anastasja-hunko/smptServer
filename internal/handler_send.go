@@ -17,44 +17,54 @@ func NewSendHandler(serv *Server) *sendHandler {
 
 }
 
-func (h *sendHandler) sendHandler(w http.ResponseWriter, r *http.Request) {
+func (h *sendHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
-		m := &model.Message{
-			AddressTo: r.FormValue("to"),
-			Header:    r.FormValue("mailHeader"),
-			Body:      r.FormValue("mailBody"),
-		}
+		h.send(rw, r)
 
-		cfg := mailjob.NewConfig()
+		return
 
-		msg := "From: " + cfg.SmtpAddress + "\n" +
-			"To: " + m.AddressTo + "\n" +
-			"Subject: " + m.Header + "\n" +
-			m.Body
+	}
 
-		addr := cfg.SmtpServer + ":" + cfg.SmtpPort
+	h.serv.Respond(rw, nil, "views/sendMail.html")
 
-		auth := smtp.PlainAuth("", cfg.SmtpAddress, cfg.SmtpPassword, cfg.SmtpServer)
+}
 
-		err := smtp.SendMail(addr, auth, cfg.SmtpAddress, []string{m.AddressTo}, []byte(msg))
+func (h *sendHandler) send(w http.ResponseWriter, r *http.Request) {
 
-		if err != nil {
+	m := &model.Message{
+		AddressTo: r.FormValue("to"),
+		Header:    r.FormValue("mailHeader"),
+		Body:      r.FormValue("mailBody"),
+	}
 
-			h.serv.writeErrorLog(err)
+	cfg := mailjob.NewConfig()
 
-			w.WriteHeader(http.StatusBadRequest)
+	msg := "From: " + cfg.SmtpAddress + "\n" +
+		"To: " + m.AddressTo + "\n" +
+		"Subject: " + m.Header + "\n" +
+		m.Body
 
-			return
-		}
+	addr := cfg.SmtpServer + ":" + cfg.SmtpPort
 
-		h.serv.writeOKMessage("Message was sent", "")
+	auth := smtp.PlainAuth("", cfg.SmtpAddress, cfg.SmtpPassword, cfg.SmtpServer)
 
-		http.Redirect(w, r, "/", 302)
+	err := smtp.SendMail(addr, auth, cfg.SmtpAddress, []string{m.AddressTo}, []byte(msg))
+
+	if err != nil {
+
+		h.serv.writeErrorLog(err)
+
+		w.WriteHeader(http.StatusBadRequest)
 
 		return
 	}
 
-	h.serv.Respond(w, nil, "views/sendMail.html")
+	h.serv.writeOKMessage("Message was sent", "")
+
+	http.Redirect(w, r, "/", 302)
+
+	return
+
 }

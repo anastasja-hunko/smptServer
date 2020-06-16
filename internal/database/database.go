@@ -27,11 +27,11 @@ func (c *Database) Open() error {
 		return err
 	}
 
+	c.db = client.Database(c.config.DatabaseName)
+
 	c.UserCol = c.NewUserCol()
 
 	c.LogCol = c.NewLogCol()
-
-	c.db = client.Database(c.config.DatabaseName)
 
 	return nil
 }
