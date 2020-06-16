@@ -54,7 +54,7 @@ func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 
@@ -62,7 +62,7 @@ func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 
 	if user.Login == "" || user.Password == "" {
 
-		h.serv.WriteResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
 
 		return
 	}
@@ -70,12 +70,12 @@ func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 	err = h.registerUser(user)
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.WriteResponse(rw, "user was created: "+user.Login, http.StatusCreated, user)
+	h.serv.writeResponse(rw, "user was created: "+user.Login, http.StatusCreated, user)
 
 }
 
@@ -88,7 +88,6 @@ func (h *userHandler) registerUser(u *model.User) error {
 	}
 
 	err := h.serv.DB.UserCol.Create(u)
-
 	if err != nil {
 		return err
 	}
@@ -107,7 +106,7 @@ func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
 	if user.Login == "" || user.Password == "" {
 
-		h.serv.WriteResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
 
 		return
 	}
@@ -116,12 +115,12 @@ func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, user)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, user)
 
 		return
 	}
 
-	h.serv.WriteResponse(rw, "password was updated", http.StatusOK, user)
+	h.serv.writeResponse(rw, "password was updated", http.StatusOK, user)
 
 	return
 
@@ -135,12 +134,12 @@ func (h *userHandler) showUsers(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.WriteResponsePlus(rw, "users", http.StatusOK, nil, users)
+	h.serv.writeResponsePlus(rw, "users", http.StatusOK, nil, users)
 }
 
 //delete user handler. If you chose the link 'delete an user' in user list. See showUsers().
@@ -153,7 +152,7 @@ func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
@@ -162,11 +161,11 @@ func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
 
 	if login == user.Login {
 
-		h.serv.WriteResponse(rw, "user active was updated and logged out", http.StatusOK, user)
+		h.serv.writeResponse(rw, "user active was updated and logged out", http.StatusOK, user)
 
 	} else {
 
-		h.serv.WriteResponse(rw, "user active was updated", http.StatusOK, nil)
+		h.serv.writeResponse(rw, "user active was updated", http.StatusOK, nil)
 
 	}
 }

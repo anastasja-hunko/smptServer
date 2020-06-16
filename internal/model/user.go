@@ -34,6 +34,7 @@ func (u *User) HashPass() error {
 
 //ComparePasswords returns equality entered password with user password
 func (u *User) ComparePasswords(password string) bool {
+
 	return checkPasswordHash(u.Password, password)
 }
 
@@ -60,11 +61,11 @@ func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newVal
 
 	history := NewHistory(field, oldValue, newValue)
 
-	histories := []History{}
+	histories := u.History
 
-	if u.History != nil {
+	if histories == nil {
 
-		histories = u.History
+		histories = []History{}
 
 	}
 
@@ -77,11 +78,12 @@ func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newVal
 
 //AppendToLogs log record to user
 func (u *User) AppendToLogs(text string) *[]Log {
-	logs := []Log{}
 
-	if u.UserLog != nil {
+	logs := u.UserLog
 
-		logs = u.UserLog
+	if logs == nil {
+
+		logs = []Log{}
 
 	}
 
@@ -94,11 +96,12 @@ func (u *User) AppendToLogs(text string) *[]Log {
 
 //AppendToMessages adds message record to user
 func (u *User) AppendToMessages(msg *Message) *[]Message {
-	messages := []Message{}
 
-	if u.Messages != nil {
+	messages := u.Messages
 
-		messages = u.Messages
+	if messages == nil {
+
+		messages = []Message{}
 
 	}
 

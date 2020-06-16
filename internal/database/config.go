@@ -10,6 +10,7 @@ type Config struct {
 
 //NewConfig returns initialized database config
 func NewConfig() *Config {
+
 	return &Config{
 		DatabaseURL:  "mongodb://localhost:27017/smptServer",
 		DatabaseName: "smptServer",

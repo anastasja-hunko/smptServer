@@ -25,6 +25,7 @@ type autorHandler struct {
 }
 
 func newAutorHandler(serv *Server) *autorHandler {
+
 	return &autorHandler{serv: serv}
 }
 
@@ -50,22 +51,21 @@ func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 
 	}
 
 	err = h.authorize(user, rw)
-
 	if err != nil {
 
-		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.WriteResponse(rw, "User was authorized", http.StatusOK, user)
+	h.serv.writeResponse(rw, "User was authorized", http.StatusOK, user)
 }
 
 /*If a user logs in with the correct credentials, this handler will
@@ -93,12 +93,11 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString(jwtKey)
-
-	fmt.Println(tokenString)
-
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(tokenString)
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:    "token",
@@ -119,5 +118,5 @@ func (h *autorHandler) logout(rw http.ResponseWriter) {
 		Expires: time.Unix(0, 0),
 	})
 
-	h.serv.WriteResponse(rw, "Logout", http.StatusOK, nil)
+	h.serv.writeResponse(rw, "Logout", http.StatusOK, nil)
 }

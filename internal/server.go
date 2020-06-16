@@ -31,6 +31,7 @@ func New(config *Config) *Server {
 
 //Start a server
 func (s *Server) Start() error {
+
 	err := s.configureLogger()
 	if err != nil {
 		return err

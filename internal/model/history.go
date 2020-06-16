@@ -9,5 +9,6 @@ type History struct {
 
 //NewHistory returns initialized history
 func NewHistory(field string, oldValue interface{}, newValue interface{}) *History {
+
 	return &History{Field: field, OldValue: oldValue, NewValue: newValue}
 }

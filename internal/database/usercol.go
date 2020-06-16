@@ -43,7 +43,6 @@ func (uc *userCol) FindByLogin(login string) (*model.User, error) {
 	var user model.User
 
 	err := uc.col.FindOne(context.TODO(), filter).Decode(&user)
-
 	if err != nil {
 		return nil, err
 	}

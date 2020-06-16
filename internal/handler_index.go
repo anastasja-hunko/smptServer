@@ -27,7 +27,6 @@ func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, error) {
 
 	c, err := r.Cookie("token")
-
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +56,8 @@ func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, erro
 }
 
 func (s *Server) getInfoForRespond(r *http.Request) (string, int, *model.User) {
-	user, err := s.getUserFromClaimsFromCookie(r)
 
+	user, err := s.getUserFromClaimsFromCookie(r)
 	if err != nil {
 
 		return err.Error() + "you're not authorized, try /createUser or /authorize", http.StatusBadRequest, user

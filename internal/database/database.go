@@ -10,13 +10,15 @@ import (
 type Database struct {
 	config  *Config
 	db      *mongo.Database
-	userCol *userCol
-	logCol  *logCol
+	UserCol *userCol
+	LogCol  *logCol
 }
 
 //New returns initialized database
 func New(config *Config) *Database {
+
 	return &Database{config: config}
+
 }
 
 //Open connects to db and ping it

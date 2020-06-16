@@ -21,7 +21,6 @@ func (dc *logCol) Create(l *model.Log) error {
 	l.BeforeCreate()
 
 	_, err := dc.col.InsertOne(context.TODO(), l)
-
 	if err != nil {
 
 		return err
