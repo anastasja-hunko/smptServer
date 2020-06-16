@@ -5,10 +5,10 @@ import "golang.org/x/crypto/bcrypt"
 //type UserLog
 
 type User struct {
-	Login    string    `json:"login" bson:"_id"`
-	Password string    `json:"password" bson:"password"`
-	Active   bool      `json:"active" bson="active"`
-	History  []History `json:"history" bson="history"`
+	Login    string `json:"login" bson:"_id"`
+	Password string `json:"password" bson:"password"`
+	Active   bool   `json:"active" bson="active"`
+	History  *[]History
 	//UserLog []*UserLog `json:"logs bson="logs"`
 }
 
@@ -51,7 +51,7 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), nil
 }
 
-func CreateHistory(field string, oldValue interface{}, newValue interface{}) *History {
+func CreateHistory(field string, oldValue interface{}, newValue interface{}) History {
 	return NewHistory(field, oldValue, newValue)
 }
 
@@ -62,7 +62,13 @@ func CreateHistory(field string, oldValue interface{}, newValue interface{}) *Hi
 func (u *User) AppendToHistory(field string, oldValue interface{}, newValue interface{}) []History {
 	history := CreateHistory(field, oldValue, newValue)
 
-	histories := u.History
+	histories := []History{}
 
-	return append(histories, *history)
+	if u.History != nil {
+
+		histories = *u.History
+
+	}
+
+	return append(histories, history)
 }

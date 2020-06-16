@@ -4,6 +4,11 @@ Host: localhost:8283
 ###
 ###create user with empty params
 ###create user with params
+POST /createUser HTTP/1.1
+Host: localhost:8283
+Content-Type: application/x-www-form-urlencoded
+
+login=m45t&password=222
 ###delete user
 ###changePassword
 ###showUsers

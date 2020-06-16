@@ -1,11 +1,11 @@
 package model
 
 type History struct {
-	field    string      `json:"field" bson:"field"`
-	oldValue interface{} `json:"oldValue" bson:"oldValue"`
-	newValue interface{} `json:"newValue" bson:"newValue"`
+	Field    string      `json:"field" bson:"field"`
+	OldValue interface{} `json:"oldValue" bson:"oldValue"`
+	NewValue interface{} `json:"newValue" bson:"newValue"`
 }
 
-func NewHistory(field string, oldValue interface{}, newValue interface{}) *History {
-	return &History{field: field, oldValue: oldValue, newValue: newValue}
+func NewHistory(field string, oldValue interface{}, newValue interface{}) History {
+	return History{Field: field, OldValue: oldValue, NewValue: newValue}
 }
