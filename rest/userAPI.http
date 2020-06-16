@@ -34,5 +34,9 @@ Content-Type: application/json
 ###create user with empty params
 
 ###delete user
+
 ###changePassword
+
 ###showUsers
+GET /showUsers HTTP/1.1
+Host: localhost:8283

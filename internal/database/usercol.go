@@ -121,6 +121,21 @@ func (uc *UserCol) UpdateUserLog(u *model.User, logMessage string) error {
 	return uc.update(update, u.Login)
 }
 
+func (uc *UserCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
+
+	messages := u.AppendToMessages(msg)
+
+	update := bson.D{
+
+		primitive.E{Key: "$set", Value: bson.D{
+
+			primitive.E{Key: "messages", Value: messages},
+		}},
+	}
+
+	return uc.update(update, u.Login)
+}
+
 func (uc *UserCol) update(update primitive.D, login string) error {
 
 	filter := bson.D{primitive.E{Key: "_id", Value: login}}

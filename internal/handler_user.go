@@ -157,9 +157,9 @@ func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookieLogin, _ := getLoginFromClaimsFromCookie(r)
+	user, _ := h.serv.getUserFromClaimsFromCookie(r)
 
-	if login == cookieLogin {
+	if login == user.Login {
 
 		http.Redirect(rw, r, "/logout", 302)
 

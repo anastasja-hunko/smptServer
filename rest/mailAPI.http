@@ -1,11 +1,12 @@
 ###send message by no user
-POST /sent HTTP/1.1
+POST /sendMail HTTP/1.1
 Host: localhost:8283
 
 ###send message by user
-POST /sent HTTP/1.1
+POST /sendMail HTTP/1.1
 Host: localhost:8283
 Content-Type: application/json
+Set-Cookie: token=
 
 {
   "to": "persilolka@gmail.com",
@@ -14,7 +15,7 @@ Content-Type: application/json
 }
 
 ###send message without `to` by user
-POST /authorize HTTP/1.1
+POST /sendMail HTTP/1.1
 Host: localhost:8283
 Content-Type: application/json
 

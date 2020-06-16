@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
@@ -63,7 +64,7 @@ func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.serv.WriteResponse(rw, "User was authorized:"+user.Login, http.StatusOK, user)
+	h.serv.WriteResponse(rw, "User was authorized", http.StatusOK, user)
 }
 
 /*If a user logs in with the correct credentials, this handler will
@@ -91,6 +92,9 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString(jwtKey)
+
+	fmt.Println(tokenString)
+
 	if err != nil {
 		return err
 	}

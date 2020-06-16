@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 )
@@ -18,31 +19,17 @@ func NewIndexHandler(serv *Server) *indexHandler {
 
 func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	login, err := getLoginFromClaimsFromCookie(r)
+	message, code, user := h.serv.getInfoForRespond(r)
 
-	if err != nil {
-
-		if err == http.ErrNoCookie || err == jwt.ErrSignatureInvalid || err.Error() == "Invalid token" {
-
-			h.serv.WriteResponse(w, "you're not authorized, try /createUser or /authorize", http.StatusOK, nil)
-
-			return
-		}
-
-		h.serv.WriteResponse(w, err.Error(), http.StatusBadRequest, nil)
-
-		return
-	}
-
-	h.serv.WriteResponse(w, "user authorized "+login, http.StatusOK, nil)
+	h.serv.WriteResponse(w, message, code, user)
 }
 
-func getLoginFromClaimsFromCookie(r *http.Request) (string, error) {
+func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, error) {
 
 	c, err := r.Cookie("token")
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	tokenString := c.Value
@@ -54,12 +41,28 @@ func getLoginFromClaimsFromCookie(r *http.Request) (string, error) {
 	})
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if !token.Valid {
-		return "", errors.New("Invalid token")
+		return nil, errors.New("Invalid token")
 	}
 
-	return claims.Login, nil
+	user, err := s.DB.UserCol.FindByLogin(claims.Login)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *Server) getInfoForRespond(r *http.Request) (string, int, *model.User) {
+	user, err := s.getUserFromClaimsFromCookie(r)
+
+	if err != nil {
+
+		return err.Error() + "you're not authorized, try /createUser or /authorize", http.StatusBadRequest, user
+	}
+
+	return "user authorized ", http.StatusOK, user
 }

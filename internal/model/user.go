@@ -5,14 +5,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//type UserLog
-
 type User struct {
 	Login    string `json:"login" bson:"_id"`
 	Password string `json:"password" bson:"password"`
 	Active   bool   `json:"active" bson="active"`
-	History  *[]History
-	UserLog  *[]Log `bson="log"`
+
+	History  *[]History `bson="history"`
+	UserLog  *[]Log     `bson="log"`
+	Messages *[]Message `bson="messages"`
 }
 
 //hash user's password and  before save to db
@@ -87,4 +87,18 @@ func (u *User) AppendToLogs(text string) *[]Log {
 	logs = append(logs, *message)
 
 	return &logs
+}
+
+func (u *User) AppendToMessages(msg *Message) *[]Message {
+	messages := *u.Messages
+
+	if messages == nil {
+
+		messages = []Message{}
+
+	}
+
+	messages = append(messages, *msg)
+
+	return &messages
 }
