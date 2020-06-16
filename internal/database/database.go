@@ -33,9 +33,9 @@ func (c *Database) Open() error {
 
 	c.db = client.Database(c.config.DatabaseName)
 
-	c.userCol = c.newUserCol()
+	c.UserCol = c.newUserCol()
 
-	c.logCol = c.newLogCol()
+	c.LogCol = c.newLogCol()
 
 	return nil
 }
