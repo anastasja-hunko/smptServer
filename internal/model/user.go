@@ -2,20 +2,22 @@ package model
 
 import "golang.org/x/crypto/bcrypt"
 
+//type UserLog
+
 type User struct {
-	Login    string  `json:"login" bson:"_id"`
-	Password string  `json:"password" bson:"password"`
-	Active   bool    `json:"active" bson="active"`
-	History  History `json:"history" bson="history"`
+	Login    string    `json:"login" bson:"_id"`
+	Password string    `json:"password" bson:"password"`
+	Active   bool      `json:"active" bson="active"`
+	History  []History `json:"history" bson="history"`
+	//UserLog []*UserLog `json:"logs bson="logs"`
 }
 
-//hash user's password before create to db
-func (u *User) BeforeCreate() error {
+//hash user's password and  before save to db
+func (u *User) HashPass() error {
 
 	if len(u.Password) > 0 {
 
 		enc, err := hashPassword(u.Password)
-
 		if err != nil {
 			return err
 		}
@@ -47,4 +49,20 @@ func hashPassword(password string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func CreateHistory(field string, oldValue interface{}, newValue interface{}) *History {
+	return NewHistory(field, oldValue, newValue)
+}
+
+//func CreateLog() {
+//
+//}
+
+func (u *User) AppendToHistory(field string, oldValue interface{}, newValue interface{}) []History {
+	history := CreateHistory(field, oldValue, newValue)
+
+	histories := u.History
+
+	return append(histories, *history)
 }

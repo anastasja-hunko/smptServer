@@ -21,14 +21,14 @@ func (db *Database) NewUserCol() *UserCol {
 
 func (uc *UserCol) Create(u *model.User) error {
 
-	err := u.BeforeCreate()
-
+	err := u.HashPass()
 	if err != nil {
 		return err
 	}
 
-	_, err = uc.col.InsertOne(context.TODO(), u)
+	u.Active = true
 
+	_, err = uc.col.InsertOne(context.TODO(), u)
 	if err != nil {
 		return err
 	}
@@ -63,34 +63,48 @@ func (uc *UserCol) UpdatePassword(u *model.User) error {
 
 	}
 
-	err := u.BeforeCreate()
+	err := u.HashPass()
 	if err != nil {
 		return err
 	}
 
-	filter := bson.D{primitive.E{Key: "_id", Value: u.Login}}
+	histories := user.AppendToHistory("Password", user.Password, u.Password)
 
 	update := bson.D{
 
 		primitive.E{Key: "$set", Value: bson.D{
 
 			primitive.E{Key: "password", Value: u.Password},
+
+			primitive.E{Key: "history", Value: histories},
 		}},
 	}
 
-	return uc.update(filter, update)
+	return uc.update(update, u.Login)
 }
 
 func (uc *UserCol) UpdateActive(login string) error {
 
-	filter := bson.D{primitive.E{Key: "_id", Value: login}}
+	user, _ := uc.FindByLogin(login)
 
-	_, err := uc.col.DeleteOne(context.TODO(), filter)
+	histories := user.AppendToHistory("Active", user.Active, false)
 
-	return err
+	update := bson.D{
+
+		primitive.E{Key: "$set", Value: bson.D{
+
+			primitive.E{Key: "active", Value: false},
+
+			primitive.E{Key: "history", Value: histories},
+		}},
+	}
+
+	return uc.update(update, login)
 }
 
-func (uc *UserCol) update(filter primitive.D, update primitive.D) error {
+func (uc *UserCol) update(update primitive.D, login string) error {
+
+	filter := bson.D{primitive.E{Key: "_id", Value: login}}
 
 	_, err := uc.col.UpdateOne(context.TODO(), filter, update)
 
