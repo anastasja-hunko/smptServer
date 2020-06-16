@@ -6,11 +6,11 @@ Host: localhost:8283
 POST /sendMail HTTP/1.1
 Host: localhost:8283
 Content-Type: application/json
-Set-Cookie: token=
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6IjEyNSIsImV4cCI6MTU5MjMyMjU2OX0.6TYb6pqXVgJ6EtQ17QwuUSEBGv5mlqgcX9qivE_fkBU
 
 {
   "to": "persilolka@gmail.com",
-  "mailHeader": "Hello",
+  "mailHeader": "eee",
   "mailBody": "Hello, World!"
 }
 
@@ -18,8 +18,11 @@ Set-Cookie: token=
 POST /sendMail HTTP/1.1
 Host: localhost:8283
 Content-Type: application/json
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6IjEyNSIsImV4cCI6MTU5MjMyMjU2OX0.6TYb6pqXVgJ6EtQ17QwuUSEBGv5mlqgcX9qivE_fkBU
 
 {
   "mailHeader": "Hello",
   "mailBody": "Hello, World!"
 }
+
+###

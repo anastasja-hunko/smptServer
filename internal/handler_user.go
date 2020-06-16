@@ -60,6 +60,13 @@ func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 
 	}
 
+	if user.Login == "" || user.Password == "" {
+
+		h.serv.WriteResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
+
+		return
+	}
+
 	err = h.registerUser(user)
 	if err != nil {
 
@@ -94,32 +101,30 @@ func (h *userHandler) registerUser(u *model.User) error {
 //		   Post: update user and save it in db, and redirect to index page
 func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPost {
+	var user = &model.User{}
 
-		user := &model.User{
-			Login:    r.FormValue("login"),
-			Password: r.FormValue("password"),
-		}
+	_ = json.NewDecoder(r.Body).Decode(user)
 
-		err := h.serv.DB.UserCol.UpdatePassword(user)
+	if user.Login == "" || user.Password == "" {
 
-		if err != nil {
-
-			h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, user)
-
-			return
-		}
-
-		h.serv.WriteResponse(rw, "password was updated", http.StatusOK, user)
-
-		//http.Redirect(rw, r, "/", 302)
+		h.serv.WriteResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
 
 		return
 	}
 
-	//h.serv.writeOKMessage("show userForm.html for creating user", "")
-	//
-	//h.serv.Respond(w, "Change password", "views/userForm.html")
+	err := h.serv.DB.UserCol.UpdatePassword(user)
+
+	if err != nil {
+
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, user)
+
+		return
+	}
+
+	h.serv.WriteResponse(rw, "password was updated", http.StatusOK, user)
+
+	return
+
 }
 
 //create user handler. If you're authorized, you see "delete an user" link on the index page.
@@ -135,11 +140,7 @@ func (h *userHandler) showUsers(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = json.NewEncoder(rw).Encode(users)
-
-	//h.serv.WriteResponse(rw, err.Error(), http.StatusOK, nil)
-
-	//h.serv.Respond(w, users, "views/users.html")
+	h.serv.WriteResponsePlus(rw, "users", http.StatusOK, nil, users)
 }
 
 //delete user handler. If you chose the link 'delete an user' in user list. See showUsers().
@@ -161,11 +162,11 @@ func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
 
 	if login == user.Login {
 
-		http.Redirect(rw, r, "/logout", 302)
+		h.serv.WriteResponse(rw, "user active was updated and logged out", http.StatusOK, user)
 
 	} else {
 
-		http.Redirect(rw, r, "/", 302)
+		h.serv.WriteResponse(rw, "user active was updated", http.StatusOK, nil)
 
 	}
 }

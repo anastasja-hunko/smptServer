@@ -1,6 +1,3 @@
-GET / HTTP/1.1
-Host: localhost:8283
-
 ###create user with params
 POST /createUser HTTP/1.1
 Host: localhost:8283
@@ -9,6 +6,16 @@ Content-Type: application/json
 {
   "login": "125",
   "password": "122"
+}
+
+###create user with empty params
+POST /createUser HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "login": "",
+  "password": ""
 }
 
 ###authorize user with correct data
@@ -31,12 +38,24 @@ Content-Type: application/json
   "password": "33"
 }
 
-###create user with empty params
-
 ###delete user
+GET /delete?login=nastya HTTP/1.1
+Host: localhost:8283
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6IjEyNSIsImV4cCI6MTU5MjMyNTkxNn0.QGLJHeTcFQm51yHN7WO5I-XSwm7tdJPHhHavav2mdPo
 
 ###changePassword
+POST /changePassword HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "login": "125",
+  "password": "122"
+}
+
 
 ###showUsers
 GET /showUsers HTTP/1.1
 Host: localhost:8283
+
+###

@@ -140,6 +140,16 @@ func (s *Server) WriteResponse(
 	status int,
 	user *model.User) {
 
+	s.WriteResponsePlus(w, message, status, user, nil)
+}
+
+func (s *Server) WriteResponsePlus(
+	w http.ResponseWriter,
+	message string,
+	status int,
+	user *model.User,
+	addedData interface{}) {
+
 	s.writeLog(message, user)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -147,9 +157,11 @@ func (s *Server) WriteResponse(
 	w.WriteHeader(status)
 
 	data := struct {
-		Message string `json:"message"`
+		Message   string      `json:"message"`
+		AddedData interface{} `json:"data"`
 	}{
-		Message: message,
+		Message:   message,
+		AddedData: addedData,
 	}
 
 	_ = json.NewEncoder(w).Encode(&data)

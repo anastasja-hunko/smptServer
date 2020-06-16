@@ -64,5 +64,5 @@ func (s *Server) getInfoForRespond(r *http.Request) (string, int, *model.User) {
 		return err.Error() + "you're not authorized, try /createUser or /authorize", http.StatusBadRequest, user
 	}
 
-	return "user authorized ", http.StatusOK, user
+	return "you're authorized ", http.StatusOK, user
 }

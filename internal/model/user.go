@@ -6,13 +6,13 @@ import (
 )
 
 type User struct {
-	Login    string `json:"login" bson:"_id"`
-	Password string `json:"password" bson:"password"`
+	Login    string `json:"login, omitempty" bson:"_id"`
+	Password string `json:"password, omitempty" bson:"password"`
 	Active   bool   `json:"active" bson="active"`
 
-	History  *[]History `bson="history"`
-	UserLog  *[]Log     `bson="log"`
-	Messages *[]Message `bson="messages"`
+	History  []History `json:"-" bson:"history"`
+	UserLog  []Log     `json:"-" bson:"log"`
+	Messages []Message `json:"-" bson:"messages"`
 }
 
 //hash user's password and  before save to db
@@ -62,7 +62,7 @@ func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newVal
 
 	if u.History != nil {
 
-		histories = *u.History
+		histories = u.History
 
 	}
 
@@ -78,7 +78,7 @@ func (u *User) AppendToLogs(text string) *[]Log {
 
 	if u.UserLog != nil {
 
-		logs = *u.UserLog
+		logs = u.UserLog
 
 	}
 
@@ -90,11 +90,11 @@ func (u *User) AppendToLogs(text string) *[]Log {
 }
 
 func (u *User) AppendToMessages(msg *Message) *[]Message {
-	messages := *u.Messages
+	messages := []Message{}
 
-	if messages == nil {
+	if u.Messages != nil {
 
-		messages = []Message{}
+		messages = u.Messages
 
 	}
 

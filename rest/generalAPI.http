@@ -1,0 +1,15 @@
+###index when unauthorize
+GET / HTTP/1.1
+Host: localhost:8283
+
+###index when authorize
+GET / HTTP/1.1
+Host: localhost:8283
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6IjEyNSIsImV4cCI6MTU5MjMyMjk3OX0.NnfYHNLPurstqvCDLwwpdTJMy12qyf4c3enjNYuKOs8
+
+###index when authorize
+GET /logout HTTP/1.1
+Host: localhost:8283
+Cookie: token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dpbiI6IjEyNSIsImV4cCI6MTU5MjMyMjk3OX0.NnfYHNLPurstqvCDLwwpdTJMy12qyf4c3enjNYuKOs8
+
+###
