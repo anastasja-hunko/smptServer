@@ -14,6 +14,7 @@ import (
 //Сreate the JWT key used to create the signature
 var jwtKey = []byte("nastya_key")
 
+//Claims struct
 type Claims struct {
 	Login string `json:"login"`
 	jwt.StandardClaims
@@ -23,7 +24,7 @@ type autorHandler struct {
 	serv *Server
 }
 
-func NewAutorHandler(serv *Server) *autorHandler {
+func newAutorHandler(serv *Server) *autorHandler {
 	return &autorHandler{serv: serv}
 }
 

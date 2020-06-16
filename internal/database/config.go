@@ -1,5 +1,6 @@
 package database
 
+//Config of database
 type Config struct {
 	DatabaseURL  string
 	DatabaseName string
@@ -7,7 +8,7 @@ type Config struct {
 	LogColName   string
 }
 
-//database config ...
+//NewConfig returns initialized database config
 func NewConfig() *Config {
 	return &Config{
 		DatabaseURL:  "mongodb://localhost:27017/smptServer",

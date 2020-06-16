@@ -5,6 +5,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//User struct
 type User struct {
 	Login    string `json:"login, omitempty" bson:"_id"`
 	Password string `json:"password, omitempty" bson:"password"`
@@ -15,7 +16,7 @@ type User struct {
 	Messages []Message `json:"-" bson:"messages"`
 }
 
-//hash user's password and  before save to db
+//HashPass encodes user's password
 func (u *User) HashPass() error {
 
 	if len(u.Password) > 0 {
@@ -31,7 +32,7 @@ func (u *User) HashPass() error {
 	return nil
 }
 
-//compare password while autorizing
+//ComparePasswords returns equality entered password with user password
 func (u *User) ComparePasswords(password string) bool {
 	return checkPasswordHash(u.Password, password)
 }
@@ -54,6 +55,7 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), nil
 }
 
+//AppendToHistoryAndLogs adds history and log records to user
 func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newValue interface{}) (*[]History, *[]Log) {
 
 	history := NewHistory(field, oldValue, newValue)
@@ -73,6 +75,7 @@ func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newVal
 	return &histories, logs
 }
 
+//AppendToLogs log record to user
 func (u *User) AppendToLogs(text string) *[]Log {
 	logs := []Log{}
 
@@ -89,6 +92,7 @@ func (u *User) AppendToLogs(text string) *[]Log {
 	return &logs
 }
 
+//AppendToMessages adds message record to user
 func (u *User) AppendToMessages(msg *Message) *[]Message {
 	messages := []Message{}
 

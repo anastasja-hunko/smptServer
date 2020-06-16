@@ -11,7 +11,7 @@ type indexHandler struct {
 	serv *Server
 }
 
-func NewIndexHandler(serv *Server) *indexHandler {
+func newIndexHandler(serv *Server) *indexHandler {
 
 	return &indexHandler{serv: serv}
 
@@ -21,7 +21,7 @@ func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	message, code, user := h.serv.getInfoForRespond(r)
 
-	h.serv.WriteResponse(w, message, code, user)
+	h.serv.writeResponse(w, message, code, user)
 }
 
 func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, error) {

@@ -6,18 +6,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//Database struct
 type Database struct {
 	config  *Config
 	db      *mongo.Database
-	UserCol *UserCol
-	LogCol  *LogCol
+	userCol *userCol
+	logCol  *logCol
 }
 
+//New returns initialized database
 func New(config *Config) *Database {
 	return &Database{config: config}
 }
 
-//connect to db and ping it
+//Open connects to db and ping it
 func (c *Database) Open() error {
 
 	clientOptions := options.Client().ApplyURI(c.config.DatabaseURL)
@@ -29,14 +31,14 @@ func (c *Database) Open() error {
 
 	c.db = client.Database(c.config.DatabaseName)
 
-	c.UserCol = c.NewUserCol()
+	c.userCol = c.newUserCol()
 
-	c.LogCol = c.NewLogCol()
+	c.logCol = c.newLogCol()
 
 	return nil
 }
 
-//close db connection
+//Close closes db connection
 func (c *Database) Close() error {
 
 	return c.db.Client().Disconnect(context.TODO())

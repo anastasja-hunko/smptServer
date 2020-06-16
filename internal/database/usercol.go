@@ -9,17 +9,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UserCol struct {
+type userCol struct {
 	col *mongo.Collection
 }
 
-func (db *Database) NewUserCol() *UserCol {
+func (db *Database) newUserCol() *userCol {
 
-	return &UserCol{col: db.db.Collection(db.config.UserColName)}
+	return &userCol{col: db.db.Collection(db.config.UserColName)}
 
 }
 
-func (uc *UserCol) Create(u *model.User) error {
+func (uc *userCol) Create(u *model.User) error {
 
 	err := u.HashPass()
 	if err != nil {
@@ -36,7 +36,7 @@ func (uc *UserCol) Create(u *model.User) error {
 	return nil
 }
 
-func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
+func (uc *userCol) FindByLogin(login string) (*model.User, error) {
 
 	filter := bson.D{primitive.E{Key: "_id", Value: login}}
 
@@ -51,7 +51,7 @@ func (uc *UserCol) FindByLogin(login string) (*model.User, error) {
 	return &user, nil
 }
 
-func (uc *UserCol) UpdatePassword(u *model.User) error {
+func (uc *userCol) UpdatePassword(u *model.User) error {
 
 	user, _ := uc.FindByLogin(u.Login)
 
@@ -85,7 +85,7 @@ func (uc *UserCol) UpdatePassword(u *model.User) error {
 	return uc.update(update, u.Login)
 }
 
-func (uc *UserCol) UpdateActive(login string) error {
+func (uc *userCol) UpdateActive(login string) error {
 
 	user, _ := uc.FindByLogin(login)
 
@@ -106,7 +106,7 @@ func (uc *UserCol) UpdateActive(login string) error {
 	return uc.update(update, login)
 }
 
-func (uc *UserCol) UpdateUserLog(u *model.User, logMessage string) error {
+func (uc *userCol) UpdateUserLog(u *model.User, logMessage string) error {
 
 	logs := u.AppendToLogs(logMessage)
 
@@ -121,7 +121,7 @@ func (uc *UserCol) UpdateUserLog(u *model.User, logMessage string) error {
 	return uc.update(update, u.Login)
 }
 
-func (uc *UserCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
+func (uc *userCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
 
 	messages := u.AppendToMessages(msg)
 
@@ -136,7 +136,7 @@ func (uc *UserCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
 	return uc.update(update, u.Login)
 }
 
-func (uc *UserCol) update(update primitive.D, login string) error {
+func (uc *userCol) update(update primitive.D, login string) error {
 
 	filter := bson.D{primitive.E{Key: "_id", Value: login}}
 
@@ -145,7 +145,7 @@ func (uc *UserCol) update(update primitive.D, login string) error {
 	return err
 }
 
-func (uc *UserCol) FindAll() ([]*model.User, error) {
+func (uc *userCol) FindAll() ([]*model.User, error) {
 
 	cur, err := uc.col.Find(context.TODO(), bson.M{})
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+//Server struct
 type Server struct {
 	config  *Config
 	Logger  *logrus.Logger
@@ -18,6 +19,7 @@ type Server struct {
 	context *context.Context
 }
 
+//New - returns initialized server
 func New(config *Config) *Server {
 
 	return &Server{
@@ -27,7 +29,7 @@ func New(config *Config) *Server {
 	}
 }
 
-//start a server
+//Start a server
 func (s *Server) Start() error {
 	err := s.configureLogger()
 	if err != nil {
@@ -47,6 +49,7 @@ func (s *Server) Start() error {
 	return http.ListenAndServe(s.config.Port, s.router)
 }
 
+//Disconnect the server
 func (s *Server) Disconnect() {
 
 	err := s.DB.Close()
@@ -71,15 +74,15 @@ func (s *Server) configureLogger() error {
 //endpoints
 func (s *Server) configureRouter() {
 
-	indexHandler := NewIndexHandler(s)
+	indexHandler := newIndexHandler(s)
 
 	s.router.Handle("/", indexHandler).Methods("GET")
 
-	sendHandler := NewSendHandler(s)
+	sendHandler := newSendHandler(s)
 
 	s.router.Handle("/sendMail", sendHandler)
 
-	userHandler := NewUserHandler(s)
+	userHandler := newUserHandler(s)
 
 	s.router.Handle("/createUser", userHandler)
 
@@ -89,7 +92,7 @@ func (s *Server) configureRouter() {
 
 	s.router.Handle("/delete", userHandler)
 
-	autorHandler := NewAutorHandler(s)
+	autorHandler := newAutorHandler(s)
 
 	s.router.Handle("/authorize", autorHandler)
 
@@ -134,16 +137,16 @@ func (s *Server) writeLog(logMessage string, user *model.User) {
 	}
 }
 
-func (s *Server) WriteResponse(
+func (s *Server) writeResponse(
 	w http.ResponseWriter,
 	message string,
 	status int,
 	user *model.User) {
 
-	s.WriteResponsePlus(w, message, status, user, nil)
+	s.writeResponsePlus(w, message, status, user, nil)
 }
 
-func (s *Server) WriteResponsePlus(
+func (s *Server) writeResponsePlus(
 	w http.ResponseWriter,
 	message string,
 	status int,

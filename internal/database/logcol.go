@@ -6,17 +6,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type LogCol struct {
+type logCol struct {
 	col *mongo.Collection
 }
 
-func (db *Database) NewLogCol() *LogCol {
+func (db *Database) newLogCol() *logCol {
 
-	return &LogCol{col: db.db.Collection(db.config.LogColName)}
+	return &logCol{col: db.db.Collection(db.config.LogColName)}
 
 }
 
-func (dc *LogCol) Create(l *model.Log) error {
+func (dc *logCol) Create(l *model.Log) error {
 
 	l.BeforeCreate()
 

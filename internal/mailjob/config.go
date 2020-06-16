@@ -1,18 +1,21 @@
 package mailjob
 
+//Config of smtp
 type Config struct {
-	SmtpServer   string
-	SmtpAddress  string
-	SmtpPassword string
-	SmtpPort     string
+	SMTPServer   string
+	SMTPAddress  string
+	SMTPPassword string
+	SMTPPort     string
 }
 
-//smtp config ...
+//NewConfig returns initialized smtp config
 func NewConfig() *Config {
+
 	return &Config{
-		SmtpServer:   "smtp.gmail.com",
-		SmtpAddress:  "gosmpt@gmail.com",
-		SmtpPassword: "go8RmptS3",
-		SmtpPort:     "587",
+		SMTPServer:   "smtp.gmail.com",
+		SMTPAddress:  "gosmpt@gmail.com",
+		SMTPPassword: "go8RmptS3",
+		SMTPPort:     "587",
 	}
+
 }

@@ -12,7 +12,7 @@ type sendHandler struct {
 	serv *Server
 }
 
-func NewSendHandler(serv *Server) *sendHandler {
+func newSendHandler(serv *Server) *sendHandler {
 
 	return &sendHandler{serv: serv}
 
