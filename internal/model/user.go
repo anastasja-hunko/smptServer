@@ -1,6 +1,9 @@
 package model
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+)
 
 //type UserLog
 
@@ -9,7 +12,7 @@ type User struct {
 	Password string `json:"password" bson:"password"`
 	Active   bool   `json:"active" bson="active"`
 	History  *[]History
-	//UserLog []*UserLog `json:"logs bson="logs"`
+	UserLog  *[]Log `bson="log"`
 }
 
 //hash user's password and  before save to db
@@ -51,16 +54,9 @@ func hashPassword(password string) (string, error) {
 	return string(bytes), nil
 }
 
-func CreateHistory(field string, oldValue interface{}, newValue interface{}) History {
-	return NewHistory(field, oldValue, newValue)
-}
+func (u *User) AppendToHistoryAndLogs(field string, oldValue interface{}, newValue interface{}) (*[]History, *[]Log) {
 
-//func CreateLog() {
-//
-//}
-
-func (u *User) AppendToHistory(field string, oldValue interface{}, newValue interface{}) []History {
-	history := CreateHistory(field, oldValue, newValue)
+	history := NewHistory(field, oldValue, newValue)
 
 	histories := []History{}
 
@@ -70,5 +66,25 @@ func (u *User) AppendToHistory(field string, oldValue interface{}, newValue inte
 
 	}
 
-	return append(histories, history)
+	histories = append(histories, *history)
+
+	logs := u.AppendToLogs(fmt.Sprintf("field %v was updated from %v to %v", field, oldValue, newValue))
+
+	return &histories, logs
+}
+
+func (u *User) AppendToLogs(text string) *[]Log {
+	logs := []Log{}
+
+	if u.UserLog != nil {
+
+		logs = *u.UserLog
+
+	}
+
+	message := NewLog(text)
+
+	logs = append(logs, *message)
+
+	return &logs
 }

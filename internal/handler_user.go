@@ -1,9 +1,11 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal/model"
+	"github.com/anastasja-hunko/smptServer/rest"
 	"net/http"
 	"strings"
 )
@@ -48,32 +50,26 @@ func (h *userHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 //		   Post: create user and save it in db, and redirect to index page
 func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPost {
+	var user = &model.User{}
 
-		user := &model.User{
-			Login:    r.FormValue("login"),
-			Password: r.FormValue("password"),
-		}
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
 
-		err := h.registerUser(user)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
-		if err != nil {
-			h.serv.writeErrorLog(err)
+		return
 
-			rw.WriteHeader(http.StatusBadRequest)
+	}
 
-			return
-		}
-		h.serv.writeOKMessage("user was created: "+user.Login, "")
+	err = h.registerUser(user)
+	if err != nil {
 
-		http.Redirect(rw, r, "/", 302)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeOKMessage("show userForm.html for creating user", "")
-
-	h.serv.Respond(rw, "Create a user", "views/userForm.html")
+	h.serv.WriteResponse(rw, "user was created: "+user.Login, http.StatusCreated, user)
 
 }
 

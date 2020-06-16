@@ -68,7 +68,7 @@ func (uc *UserCol) UpdatePassword(u *model.User) error {
 		return err
 	}
 
-	histories := user.AppendToHistory("Password", user.Password, u.Password)
+	histories, logs := user.AppendToHistoryAndLogs("Password", user.Password, u.Password)
 
 	update := bson.D{
 
@@ -77,6 +77,8 @@ func (uc *UserCol) UpdatePassword(u *model.User) error {
 			primitive.E{Key: "password", Value: u.Password},
 
 			primitive.E{Key: "history", Value: histories},
+
+			primitive.E{Key: "log", Value: logs},
 		}},
 	}
 
@@ -87,7 +89,7 @@ func (uc *UserCol) UpdateActive(login string) error {
 
 	user, _ := uc.FindByLogin(login)
 
-	histories := user.AppendToHistory("Active", user.Active, false)
+	histories, logs := user.AppendToHistoryAndLogs("Active", user.Active, false)
 
 	update := bson.D{
 
@@ -96,10 +98,27 @@ func (uc *UserCol) UpdateActive(login string) error {
 			primitive.E{Key: "active", Value: false},
 
 			primitive.E{Key: "history", Value: histories},
+
+			primitive.E{Key: "log", Value: logs},
 		}},
 	}
 
 	return uc.update(update, login)
+}
+
+func (uc *UserCol) UpdateUserLog(u *model.User, logMessage string) error {
+
+	logs := u.AppendToLogs(logMessage)
+
+	update := bson.D{
+
+		primitive.E{Key: "$set", Value: bson.D{
+
+			primitive.E{Key: "log", Value: logs},
+		}},
+	}
+
+	return uc.update(update, u.Login)
 }
 
 func (uc *UserCol) update(update primitive.D, login string) error {

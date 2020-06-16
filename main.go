@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal"
 	"net/http"
@@ -38,7 +39,9 @@ func main() {
 
 	server := internal.New(config)
 
-	go server.Start()
+	ctx := context.TODO()
+
+	go server.Start(ctx)
 
 	go serverCheck(config.Port)
 

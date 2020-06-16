@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"github.com/anastasja-hunko/smptServer/internal/model"
+	"github.com/anastasja-hunko/smptServer/rest"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strings"
@@ -54,7 +55,9 @@ func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request)
 		if err != nil {
 			h.serv.writeErrorLog(err)
 
-			rw.WriteHeader(http.StatusBadRequest)
+			rest.WriteError(rw, err.Error(), http.StatusBadRequest)
+
+			//rw.WriteHeader(http.StatusBadRequest)
 
 			return
 		}

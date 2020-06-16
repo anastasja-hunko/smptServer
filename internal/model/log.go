@@ -3,16 +3,14 @@ package model
 import "time"
 
 type Log struct {
-	Text  string `bson:"text"`
-	Login string `bson:"login"`
-	Time  string `bson:"time"`
+	Text string `bson:"text"`
+	Time string `bson:"time"`
 }
 
-func NewLog(text string, login string) *Log {
+func NewLog(text string) *Log {
 
 	return &Log{
-		Text:  text,
-		Login: login,
+		Text: text,
 	}
 }
 

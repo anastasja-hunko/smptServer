@@ -6,9 +6,12 @@ Host: localhost:8283
 ###create user with params
 POST /createUser HTTP/1.1
 Host: localhost:8283
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-login=m45t&password=222
+{
+  "login": "125",
+  "password": "122"
+}
 ###delete user
 ###changePassword
 ###showUsers

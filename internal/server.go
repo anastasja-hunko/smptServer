@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"context"
+	"encoding/json"
 	db "github.com/anastasja-hunko/smptServer/internal/database"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/gorilla/mux"
@@ -10,10 +12,11 @@ import (
 )
 
 type Server struct {
-	config *Config
-	Logger *logrus.Logger
-	router *mux.Router
-	DB     *db.Database
+	config  *Config
+	Logger  *logrus.Logger
+	router  *mux.Router
+	DB      *db.Database
+	context *context.Context
 }
 
 func New(config *Config) *Server {
@@ -27,7 +30,6 @@ func New(config *Config) *Server {
 
 //start a server
 func (s *Server) Start() error {
-
 	err := s.configureLogger()
 	if err != nil {
 		return err
@@ -127,29 +129,46 @@ func (s *Server) Respond(rw http.ResponseWriter, data interface{}, page string) 
 	}
 }
 
-func (s *Server) writeLog(logMessage *model.Log) {
+func (s *Server) writeLog(logMessage string, user *model.User) {
 
-	err := s.DB.LogCol.Create(logMessage)
+	s.Logger.Error(logMessage)
+
+	if user != nil {
+
+		err := s.DB.UserCol.UpdateUserLog(user, logMessage)
+		if err != nil {
+			s.Logger.Error(err)
+		}
+
+		return
+
+	}
+
+	message := model.NewLog(logMessage)
+
+	err := s.DB.LogCol.Create(message)
 	if err != nil {
 		s.Logger.Error(err)
 	}
-
 }
 
-func (s *Server) writeErrorLog(err error) {
+func (s *Server) WriteResponse(
+	w http.ResponseWriter,
+	message string,
+	status int,
+	user *model.User) {
 
-	s.Logger.Error(err)
+	s.writeLog(message, user)
 
-	logMessage := model.NewLog(err.Error(), "")
+	w.Header().Set("Content-Type", "application/json")
 
-	s.writeLog(logMessage)
-}
+	w.WriteHeader(status)
 
-func (s *Server) writeOKMessage(message string, login string) {
+	data := struct {
+		Message string `json:"message"`
+	}{
+		Message: message,
+	}
 
-	s.Logger.Info(message)
-
-	logMessage := model.NewLog(message, login)
-
-	s.writeLog(logMessage)
+	_ = json.NewEncoder(w).Encode(&data)
 }

@@ -6,6 +6,6 @@ type History struct {
 	NewValue interface{} `json:"newValue" bson:"newValue"`
 }
 
-func NewHistory(field string, oldValue interface{}, newValue interface{}) History {
-	return History{Field: field, OldValue: oldValue, NewValue: newValue}
+func NewHistory(field string, oldValue interface{}, newValue interface{}) *History {
+	return &History{Field: field, OldValue: oldValue, NewValue: newValue}
 }
