@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"github.com/anastasja-hunko/smptServer/internal/mailjob"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"net/http"
@@ -19,26 +20,16 @@ func NewSendHandler(serv *Server) *sendHandler {
 
 func (h *sendHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPost {
+	var m = &model.Message{}
 
-		h.send(rw, r)
+	err := json.NewDecoder(r.Body).Decode(m)
+	if err != nil {
+
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 
 	}
-
-	h.serv.Respond(rw, nil, "views/sendMail.html")
-
-}
-
-func (h *sendHandler) send(w http.ResponseWriter, r *http.Request) {
-
-	m := &model.Message{
-		AddressTo: r.FormValue("to"),
-		Header:    r.FormValue("mailHeader"),
-		Body:      r.FormValue("mailBody"),
-	}
-
 	cfg := mailjob.NewConfig()
 
 	msg := "From: " + cfg.SmtpAddress + "\n" +
@@ -50,21 +41,16 @@ func (h *sendHandler) send(w http.ResponseWriter, r *http.Request) {
 
 	auth := smtp.PlainAuth("", cfg.SmtpAddress, cfg.SmtpPassword, cfg.SmtpServer)
 
-	err := smtp.SendMail(addr, auth, cfg.SmtpAddress, []string{m.AddressTo}, []byte(msg))
+	err = smtp.SendMail(addr, auth, cfg.SmtpAddress, []string{m.AddressTo}, []byte(msg))
 
 	if err != nil {
 
-		h.serv.writeErrorLog(err)
-
-		w.WriteHeader(http.StatusBadRequest)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeOKMessage("Message was sent", "")
+	h.serv.WriteResponse(rw, "message was sent", http.StatusOK, nil)
 
-	http.Redirect(w, r, "/", 302)
-
-	return
-
+	//http.Redirect(w, r, "/", 302)
 }

@@ -1,0 +1,24 @@
+###send message by no user
+POST /sent HTTP/1.1
+Host: localhost:8283
+
+###send message by user
+POST /sent HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "to": "persilolka@gmail.com",
+  "mailHeader": "Hello",
+  "mailBody": "Hello, World!"
+}
+
+###send message without `to` by user
+POST /authorize HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "mailHeader": "Hello",
+  "mailBody": "Hello, World!"
+}

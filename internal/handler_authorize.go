@@ -1,9 +1,9 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/anastasja-hunko/smptServer/internal/model"
-	"github.com/anastasja-hunko/smptServer/rest"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strings"
@@ -36,40 +36,34 @@ func (h *autorHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 	if strings.Contains(r.URL.String(), "logout") {
 
-		h.logout(rw, r)
+		h.logout(rw)
 
 	}
 }
 
 func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPost {
+	var user = &model.User{}
 
-		u := &model.User{
-			Login:    r.FormValue("login"),
-			Password: r.FormValue("password"),
-		}
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
 
-		err := h.authorize(u, rw)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
-		if err != nil {
-			h.serv.writeErrorLog(err)
+		return
 
-			rest.WriteError(rw, err.Error(), http.StatusBadRequest)
+	}
 
-			//rw.WriteHeader(http.StatusBadRequest)
+	err = h.authorize(user, rw)
 
-			return
-		}
+	if err != nil {
 
-		h.serv.writeOKMessage("User was authorized", u.Login)
-
-		http.Redirect(rw, r, "/", 302)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.Respond(rw, "Authorization", "views/userForm.html")
+	h.serv.WriteResponse(rw, "User was authorized:"+user.Login, http.StatusOK, user)
 }
 
 /*If a user logs in with the correct credentials, this handler will
@@ -112,7 +106,7 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 
 //logout handler. If you're authorized, you see "quit" link on the index page.
 //Results: Get: clean cookie and redirect
-func (h *autorHandler) logout(rw http.ResponseWriter, r *http.Request) {
+func (h *autorHandler) logout(rw http.ResponseWriter) {
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:    "token",
@@ -120,7 +114,5 @@ func (h *autorHandler) logout(rw http.ResponseWriter, r *http.Request) {
 		Expires: time.Unix(0, 0),
 	})
 
-	h.serv.writeOKMessage("Logout", "")
-
-	http.Redirect(rw, r, "/", 302)
+	h.serv.WriteResponse(rw, "Logout", http.StatusOK, nil)
 }

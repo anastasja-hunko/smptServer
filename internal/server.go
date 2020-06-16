@@ -7,7 +7,6 @@ import (
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"html/template"
 	"net/http"
 )
 
@@ -43,7 +42,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	s.writeOKMessage("starting server...", "")
+	s.Logger.Print("starting server...", "")
 
 	return http.ListenAndServe(s.config.Port, s.router)
 }
@@ -110,23 +109,6 @@ func (s *Server) configureDatabase() error {
 
 	s.DB = dbase
 	return nil
-}
-
-//execute html template
-func executeTemplate(page string, w http.ResponseWriter, data interface{}) error {
-
-	tmpl := template.Must(template.ParseFiles(page))
-
-	return tmpl.Execute(w, data)
-}
-
-//action's respond when everything is OK
-func (s *Server) Respond(rw http.ResponseWriter, data interface{}, page string) {
-
-	err := executeTemplate(page, rw, data)
-	if err != nil {
-		s.writeErrorLog(err)
-	}
 }
 
 func (s *Server) writeLog(logMessage string, user *model.User) {

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal/model"
-	"github.com/anastasja-hunko/smptServer/rest"
 	"net/http"
 	"strings"
 )
@@ -93,7 +92,7 @@ func (h *userHandler) registerUser(u *model.User) error {
 //change password handler. If you're not authorized, you see "forgot a password" link on the index page.
 //Results: Get: show form for data input
 //		   Post: update user and save it in db, and redirect to index page
-func (h *userHandler) changePassword(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
@@ -106,45 +105,46 @@ func (h *userHandler) changePassword(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 
-			h.serv.writeErrorLog(err)
-
-			w.WriteHeader(http.StatusBadRequest)
+			h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, user)
 
 			return
 		}
-		h.serv.writeOKMessage("password was updated: "+user.Login, "")
 
-		http.Redirect(w, r, "/", 302)
+		h.serv.WriteResponse(rw, "password was updated", http.StatusOK, user)
+
+		//http.Redirect(rw, r, "/", 302)
 
 		return
 	}
 
-	h.serv.writeOKMessage("show userForm.html for creating user", "")
-
-	h.serv.Respond(w, "Change password", "views/userForm.html")
+	//h.serv.writeOKMessage("show userForm.html for creating user", "")
+	//
+	//h.serv.Respond(w, "Change password", "views/userForm.html")
 }
 
 //create user handler. If you're authorized, you see "delete an user" link on the index page.
 //Results: Get: show all users in the table
-func (h *userHandler) showUsers(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) showUsers(rw http.ResponseWriter, r *http.Request) {
 
 	users, err := h.serv.DB.UserCol.FindAll()
 
 	if err != nil {
 
-		h.serv.writeErrorLog(err)
-
-		w.WriteHeader(http.StatusBadRequest)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.Respond(w, users, "views/users.html")
+	_ = json.NewEncoder(rw).Encode(users)
+
+	//h.serv.WriteResponse(rw, err.Error(), http.StatusOK, nil)
+
+	//h.serv.Respond(w, users, "views/users.html")
 }
 
 //delete user handler. If you chose the link 'delete an user' in user list. See showUsers().
 //Results: Get: delete the user from db
-func (h *userHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
 
 	login := fmt.Sprint(r.URL.Query().Get("login"))
 
@@ -152,7 +152,7 @@ func (h *userHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		h.serv.writeErrorLog(err)
+		h.serv.WriteResponse(rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
@@ -161,11 +161,11 @@ func (h *userHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
 
 	if login == cookieLogin {
 
-		http.Redirect(w, r, "/logout", 302)
+		http.Redirect(rw, r, "/logout", 302)
 
 	} else {
 
-		http.Redirect(w, r, "/", 302)
+		http.Redirect(rw, r, "/", 302)
 
 	}
 }

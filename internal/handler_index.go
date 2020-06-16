@@ -24,23 +24,17 @@ func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if err == http.ErrNoCookie || err == jwt.ErrSignatureInvalid || err.Error() == "Invalid token" {
 
-			h.serv.writeOKMessage("show nonAuthorizedIndex.html", "")
-
-			h.serv.Respond(w, nil, "views/nonAuthorizedIndex.html")
+			h.serv.WriteResponse(w, "you're not authorized, try /createUser or /authorize", http.StatusOK, nil)
 
 			return
 		}
 
-		h.serv.writeErrorLog(err)
-
-		w.WriteHeader(http.StatusBadRequest)
+		h.serv.WriteResponse(w, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeOKMessage("show index.html", login)
-
-	h.serv.Respond(w, login, "views/index.html")
+	h.serv.WriteResponse(w, "user authorized "+login, http.StatusOK, nil)
 }
 
 func getLoginFromClaimsFromCookie(r *http.Request) (string, error) {

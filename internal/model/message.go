@@ -1,7 +1,7 @@
 package model
 
 type Message struct {
-	AddressTo string
-	Header    string
-	Body      string
+	AddressTo string `json:"to"`
+	Header    string `json:"mailHeader"`
+	Body      string `json:"mailBody"`
 }

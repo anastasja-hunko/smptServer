@@ -1,8 +1,6 @@
 GET / HTTP/1.1
 Host: localhost:8283
 
-###
-###create user with empty params
 ###create user with params
 POST /createUser HTTP/1.1
 Host: localhost:8283
@@ -12,6 +10,29 @@ Content-Type: application/json
   "login": "125",
   "password": "122"
 }
+
+###authorize user with correct data
+POST /authorize HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "login": "125",
+  "password": "122"
+}
+
+###authorize user with incorrect data
+POST /authorize HTTP/1.1
+Host: localhost:8283
+Content-Type: application/json
+
+{
+  "login": "125",
+  "password": "33"
+}
+
+###create user with empty params
+
 ###delete user
 ###changePassword
 ###showUsers
