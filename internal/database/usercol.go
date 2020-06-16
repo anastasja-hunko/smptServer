@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 type userCol struct {
@@ -19,7 +20,7 @@ func (db *Database) newUserCol() *userCol {
 
 }
 
-func (uc *userCol) Create(u *model.User) error {
+func (uc *userCol) Create(ctx context.Context, u *model.User) error {
 
 	err := u.HashPass()
 	if err != nil {
@@ -28,7 +29,11 @@ func (uc *userCol) Create(u *model.User) error {
 
 	u.Active = true
 
-	_, err = uc.col.InsertOne(context.TODO(), u)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Millisecond)
+
+	defer cancel()
+
+	_, err = uc.col.InsertOne(ctx, u)
 	if err != nil {
 		return err
 	}
@@ -36,13 +41,17 @@ func (uc *userCol) Create(u *model.User) error {
 	return nil
 }
 
-func (uc *userCol) FindByLogin(login string) (*model.User, error) {
+func (uc *userCol) FindByLogin(ctx context.Context, login string) (*model.User, error) {
 
 	filter := bson.D{primitive.E{Key: "_id", Value: login}}
 
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Millisecond)
+
+	defer cancel()
+
 	var user model.User
 
-	err := uc.col.FindOne(context.TODO(), filter).Decode(&user)
+	err := uc.col.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -50,9 +59,9 @@ func (uc *userCol) FindByLogin(login string) (*model.User, error) {
 	return &user, nil
 }
 
-func (uc *userCol) UpdatePassword(u *model.User) error {
+func (uc *userCol) UpdatePassword(ctx context.Context, u *model.User) error {
 
-	user, _ := uc.FindByLogin(u.Login)
+	user, _ := uc.FindByLogin(ctx, u.Login)
 
 	equal := user.ComparePasswords(u.Password)
 
@@ -81,12 +90,12 @@ func (uc *userCol) UpdatePassword(u *model.User) error {
 		}},
 	}
 
-	return uc.update(update, u.Login)
+	return uc.update(ctx, update, u.Login)
 }
 
-func (uc *userCol) UpdateActive(login string) error {
+func (uc *userCol) UpdateActive(ctx context.Context, login string) error {
 
-	user, _ := uc.FindByLogin(login)
+	user, _ := uc.FindByLogin(ctx, login)
 
 	histories, logs := user.AppendToHistoryAndLogs("Active", user.Active, false)
 
@@ -102,10 +111,10 @@ func (uc *userCol) UpdateActive(login string) error {
 		}},
 	}
 
-	return uc.update(update, login)
+	return uc.update(ctx, update, login)
 }
 
-func (uc *userCol) UpdateUserLog(u *model.User, logMessage string) error {
+func (uc *userCol) UpdateUserLog(ctx context.Context, u *model.User, logMessage string) error {
 
 	logs := u.AppendToLogs(logMessage)
 
@@ -117,10 +126,10 @@ func (uc *userCol) UpdateUserLog(u *model.User, logMessage string) error {
 		}},
 	}
 
-	return uc.update(update, u.Login)
+	return uc.update(ctx, update, u.Login)
 }
 
-func (uc *userCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
+func (uc *userCol) UpdateUserMessages(ctx context.Context, u *model.User, msg *model.Message) error {
 
 	messages := u.AppendToMessages(msg)
 
@@ -132,28 +141,36 @@ func (uc *userCol) UpdateUserMessages(u *model.User, msg *model.Message) error {
 		}},
 	}
 
-	return uc.update(update, u.Login)
+	return uc.update(ctx, update, u.Login)
 }
 
-func (uc *userCol) update(update primitive.D, login string) error {
+func (uc *userCol) update(ctx context.Context, update primitive.D, login string) error {
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Millisecond)
+
+	defer cancel()
 
 	filter := bson.D{primitive.E{Key: "_id", Value: login}}
 
-	_, err := uc.col.UpdateOne(context.TODO(), filter, update)
+	_, err := uc.col.UpdateOne(ctx, filter, update)
 
 	return err
 }
 
-func (uc *userCol) FindAll() ([]*model.User, error) {
+func (uc *userCol) FindAll(ctx context.Context) ([]*model.User, error) {
 
-	cur, err := uc.col.Find(context.TODO(), bson.M{})
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Millisecond)
+
+	defer cancel()
+
+	cur, err := uc.col.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
 	}
 
 	var results []*model.User
 
-	for cur.Next(context.TODO()) {
+	for cur.Next(ctx) {
 
 		var elem model.User
 
@@ -171,7 +188,7 @@ func (uc *userCol) FindAll() ([]*model.User, error) {
 	}
 
 	// Close the cursor once finished
-	cur.Close(context.TODO())
+	cur.Close(ctx)
 
 	return results, nil
 }

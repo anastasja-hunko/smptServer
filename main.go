@@ -7,17 +7,21 @@ import (
 	"time"
 )
 
-func serverCheck(port string) {
+func serverCheck(server *internal.Server) {
 
 	ticker := time.NewTicker(5 * time.Second)
 
 	for t := range ticker.C {
 
-		_, err := http.Get("http://127.0.0.1" + port)
+		_, err := http.Get("http://127.0.0.1" + server.Config.Port)
 
 		if err != nil {
 
 			fmt.Println("it doesn't work at:", t)
+
+			go server.Restart()
+
+			select {}
 
 		} else {
 
@@ -38,11 +42,9 @@ func main() {
 
 	server := internal.New(config)
 
-	//ctx := context.TODO()
-
 	go server.Start()
 
-	go serverCheck(config.Port)
+	go serverCheck(server)
 
 	select {}
 }

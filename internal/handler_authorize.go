@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,41 +32,45 @@ func newAutorHandler(serv *Server) *autorHandler {
 
 func (h *autorHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+
+	defer cancel()
+
 	if strings.Contains(r.URL.String(), "authorize") {
 
-		h.authorizeHandler(rw, r)
+		h.authorizeHandler(ctx, rw, r)
 
 	}
 
 	if strings.Contains(r.URL.String(), "logout") {
 
-		h.logout(rw)
+		h.logout(ctx, rw)
 
 	}
 }
 
-func (h *autorHandler) authorizeHandler(rw http.ResponseWriter, r *http.Request) {
+func (h *autorHandler) authorizeHandler(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 
 	var user = &model.User{}
 
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 
 	}
 
-	err = h.authorize(user, rw)
+	err = h.authorize(user, rw, ctx)
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeResponse(rw, "User was authorized", http.StatusOK, user)
+	h.serv.writeResponse(ctx, rw, "User was authorized", http.StatusOK, user)
 }
 
 /*If a user logs in with the correct credentials, this handler will
@@ -73,9 +78,9 @@ then set a cookie on the client side with the JWT value. Once a cookie is
 set on a client, it is sent along with every request henceforth.
 */
 
-func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
+func (h *autorHandler) authorize(ctx context.Context, u *model.User, rw http.ResponseWriter) error {
 
-	user, err := h.serv.DB.UserCol.FindByLogin(u.Login)
+	user, err := h.serv.DB.UserCol.FindByLogin(ctx, u.Login)
 
 	if err != nil || !user.ComparePasswords(u.Password) {
 		return errors.New("incorrect password or login")
@@ -110,7 +115,7 @@ func (h *autorHandler) authorize(u *model.User, rw http.ResponseWriter) error {
 
 //logout handler. If you're authorized, you see "quit" link on the index page.
 //Results: Get: clean cookie and redirect
-func (h *autorHandler) logout(rw http.ResponseWriter) {
+func (h *autorHandler) logout(ctx context.Context, rw http.ResponseWriter) {
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:    "token",
@@ -118,5 +123,5 @@ func (h *autorHandler) logout(rw http.ResponseWriter) {
 		Expires: time.Unix(0, 0),
 	})
 
-	h.serv.writeResponse(rw, "Logout", http.StatusOK, nil)
+	h.serv.writeResponse(ctx, rw, "Logout", http.StatusOK, nil)
 }

@@ -12,7 +12,7 @@ import (
 
 //Server struct
 type Server struct {
-	config  *Config
+	Config  *Config
 	Logger  *logrus.Logger
 	router  *mux.Router
 	DB      *db.Database
@@ -23,7 +23,7 @@ type Server struct {
 func New(config *Config) *Server {
 
 	return &Server{
-		config: config,
+		Config: config,
 		Logger: logrus.New(),
 		router: mux.NewRouter(),
 	}
@@ -40,14 +40,26 @@ func (s *Server) Start() error {
 	s.configureRouter()
 
 	err = s.configureDatabase()
-
 	if err != nil {
 		return err
 	}
 
-	s.Logger.Print("starting server...", "")
+	s.Logger.Print("starting server...")
 
-	return http.ListenAndServe(s.config.Port, s.router)
+	return http.ListenAndServe(s.Config.Port, s.router)
+}
+
+//Restart a server
+func (s *Server) Restart() error {
+
+	err := s.configureDatabase()
+	if err != nil {
+		return err
+	}
+
+	s.Logger.Print("restarting server...")
+
+	return http.ListenAndServe(s.Config.Port, s.router)
 }
 
 //Disconnect the server
@@ -63,7 +75,7 @@ func (s *Server) Disconnect() {
 
 func (s *Server) configureLogger() error {
 
-	level, err := logrus.ParseLevel(s.config.LogLevel)
+	level, err := logrus.ParseLevel(s.Config.LogLevel)
 	if err != nil {
 		return err
 	}
@@ -103,7 +115,7 @@ func (s *Server) configureRouter() {
 //configure database with config
 func (s *Server) configureDatabase() error {
 
-	dbase := db.New(s.config.DbConfig)
+	dbase := db.New(s.Config.DbConfig)
 
 	err := dbase.Open()
 
@@ -115,13 +127,13 @@ func (s *Server) configureDatabase() error {
 	return nil
 }
 
-func (s *Server) writeLog(logMessage string, user *model.User) {
+func (s *Server) writeLog(ctx context.Context, logMessage string, user *model.User) {
 
 	s.Logger.Error(logMessage)
 
 	if user != nil {
 
-		err := s.DB.UserCol.UpdateUserLog(user, logMessage)
+		err := s.DB.UserCol.UpdateUserLog(ctx, user, logMessage)
 		if err != nil {
 			s.Logger.Error(err)
 		}
@@ -132,29 +144,33 @@ func (s *Server) writeLog(logMessage string, user *model.User) {
 
 	message := model.NewLog(logMessage)
 
-	err := s.DB.LogCol.Create(message)
+	err := s.DB.LogCol.Create(ctx, message)
 	if err != nil {
 		s.Logger.Error(err)
 	}
 }
 
 func (s *Server) writeResponse(
-	w http.ResponseWriter,
-	message string,
-	status int,
-	user *model.User) {
-
-	s.writeResponsePlus(w, message, status, user, nil)
-}
-
-func (s *Server) writeResponsePlus(
+	ctx context.Context,
 	w http.ResponseWriter,
 	message string,
 	status int,
 	user *model.User,
-	addedData interface{}) {
+) {
 
-	s.writeLog(message, user)
+	s.writeResponsePlus(ctx, w, message, status, user, nil)
+}
+
+func (s *Server) writeResponsePlus(
+	ctx context.Context,
+	w http.ResponseWriter,
+	message string,
+	status int,
+	user *model.User,
+	addedData interface{},
+) {
+
+	s.writeLog(ctx, message, user)
 
 	w.Header().Set("Content-Type", "application/json")
 

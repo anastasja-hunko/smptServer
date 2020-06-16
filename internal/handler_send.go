@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/anastasja-hunko/smptServer/internal/mailjob"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"net/http"
 	"net/smtp"
+	"time"
 )
 
 type sendHandler struct {
@@ -20,7 +22,11 @@ func newSendHandler(serv *Server) *sendHandler {
 
 func (h *sendHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
-	_, _, user := h.serv.getInfoForRespond(r)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+
+	defer cancel()
+
+	_, _, user := h.serv.getInfoForRespond(ctx, r)
 
 	if user != nil {
 
@@ -29,7 +35,7 @@ func (h *sendHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(m)
 		if err != nil {
 
-			h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, user)
+			h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, user)
 
 			return
 
@@ -48,13 +54,13 @@ func (h *sendHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		err = smtp.SendMail(addr, auth, cfg.SMTPAddress, []string{m.AddressTo}, []byte(msg))
 		if err != nil {
 
-			h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, user)
+			h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, user)
 
 			return
 		}
 
-		h.serv.DB.UserCol.UpdateUserMessages(user, m)
+		h.serv.DB.UserCol.UpdateUserMessages(ctx, user, m)
 
-		h.serv.writeResponse(rw, "message was sent", http.StatusOK, user)
+		h.serv.writeResponse(ctx, rw, "message was sent", http.StatusOK, user)
 	}
 }

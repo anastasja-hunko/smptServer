@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"context"
 	"errors"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"time"
 )
 
 type indexHandler struct {
@@ -19,12 +21,16 @@ func newIndexHandler(serv *Server) *indexHandler {
 
 func (h *indexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	message, code, user := h.serv.getInfoForRespond(r)
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 
-	h.serv.writeResponse(w, message, code, user)
+	defer cancel()
+
+	message, code, user := h.serv.getInfoForRespond(ctx, r)
+
+	h.serv.writeResponse(ctx, w, message, code, user)
 }
 
-func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, error) {
+func (s *Server) getUserFromClaimsFromCookie(ctx context.Context, r *http.Request) (*model.User, error) {
 
 	c, err := r.Cookie("token")
 	if err != nil {
@@ -44,10 +50,10 @@ func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, erro
 	}
 
 	if !token.Valid {
-		return nil, errors.New("Invalid token")
+		return nil, errors.New("invalid token")
 	}
 
-	user, err := s.DB.UserCol.FindByLogin(claims.Login)
+	user, err := s.DB.UserCol.FindByLogin(ctx, claims.Login)
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +61,9 @@ func (s *Server) getUserFromClaimsFromCookie(r *http.Request) (*model.User, erro
 	return user, nil
 }
 
-func (s *Server) getInfoForRespond(r *http.Request) (string, int, *model.User) {
+func (s *Server) getInfoForRespond(ctx context.Context, r *http.Request) (string, int, *model.User) {
 
-	user, err := s.getUserFromClaimsFromCookie(r)
+	user, err := s.getUserFromClaimsFromCookie(ctx, r)
 	if err != nil {
 
 		return err.Error() + "you're not authorized, try /createUser or /authorize", http.StatusBadRequest, user

@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type userHandler struct {
@@ -19,27 +21,31 @@ func newUserHandler(s *Server) *userHandler {
 
 func (h *userHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+
+	defer cancel()
+
 	if strings.Contains(r.URL.String(), "createUser") {
 
-		h.createUser(rw, r)
+		h.createUser(ctx, rw, r)
 
 	}
 
 	if strings.Contains(r.URL.String(), "changePassword") {
 
-		h.changePassword(rw, r)
+		h.changePassword(ctx, rw, r)
 
 	}
 
 	if strings.Contains(r.URL.String(), "showUsers") {
 
-		h.showUsers(rw, r)
+		h.showUsers(ctx, rw)
 
 	}
 
 	if strings.Contains(r.URL.String(), "delete") {
 
-		h.deleteUser(rw, r)
+		h.deleteUser(ctx, rw, r)
 
 	}
 }
@@ -47,14 +53,14 @@ func (h *userHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 //create user handler. If you're not authorized, you see "create a user" link on the index page.
 //Results: Get: show form for data input
 //		   Post: create user and save it in db, and redirect to index page
-func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
+func (h *userHandler) createUser(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 
 	var user = &model.User{}
 
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 
@@ -62,32 +68,32 @@ func (h *userHandler) createUser(rw http.ResponseWriter, r *http.Request) {
 
 	if user.Login == "" || user.Password == "" {
 
-		h.serv.writeResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, "Login or password are empty", http.StatusBadRequest, nil)
 
 		return
 	}
 
-	err = h.registerUser(user)
+	err = h.registerUser(ctx, user)
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeResponse(rw, "user was created: "+user.Login, http.StatusCreated, user)
+	h.serv.writeResponse(ctx, rw, "user was created: "+user.Login, http.StatusCreated, user)
 
 }
 
-func (h *userHandler) registerUser(u *model.User) error {
+func (h *userHandler) registerUser(ctx context.Context, u *model.User) error {
 
-	user, _ := h.serv.DB.UserCol.FindByLogin(u.Login)
+	user, _ := h.serv.DB.UserCol.FindByLogin(ctx, u.Login)
 
 	if user != nil {
 		return errors.New("user's already existed with login:" + u.Login)
 	}
 
-	err := h.serv.DB.UserCol.Create(u)
+	err := h.serv.DB.UserCol.Create(ctx, u)
 	if err != nil {
 		return err
 	}
@@ -98,7 +104,7 @@ func (h *userHandler) registerUser(u *model.User) error {
 //change password handler. If you're not authorized, you see "forgot a password" link on the index page.
 //Results: Get: show form for data input
 //		   Post: update user and save it in db, and redirect to index page
-func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
+func (h *userHandler) changePassword(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 
 	var user = &model.User{}
 
@@ -106,21 +112,21 @@ func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
 	if user.Login == "" || user.Password == "" {
 
-		h.serv.writeResponse(rw, "Login or password are empty", http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, "Login or password are empty", http.StatusBadRequest, nil)
 
 		return
 	}
 
-	err := h.serv.DB.UserCol.UpdatePassword(user)
+	err := h.serv.DB.UserCol.UpdatePassword(ctx, user)
 
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, user)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, user)
 
 		return
 	}
 
-	h.serv.writeResponse(rw, "password was updated", http.StatusOK, user)
+	h.serv.writeResponse(ctx, rw, "password was updated", http.StatusOK, user)
 
 	return
 
@@ -128,44 +134,44 @@ func (h *userHandler) changePassword(rw http.ResponseWriter, r *http.Request) {
 
 //create user handler. If you're authorized, you see "delete an user" link on the index page.
 //Results: Get: show all users in the table
-func (h *userHandler) showUsers(rw http.ResponseWriter, r *http.Request) {
+func (h *userHandler) showUsers(ctx context.Context, rw http.ResponseWriter) {
 
-	users, err := h.serv.DB.UserCol.FindAll()
+	users, err := h.serv.DB.UserCol.FindAll(ctx)
 
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	h.serv.writeResponsePlus(rw, "users", http.StatusOK, nil, users)
+	h.serv.writeResponsePlus(ctx, rw, "users", http.StatusOK, nil, users)
 }
 
 //delete user handler. If you chose the link 'delete an user' in user list. See showUsers().
 //Results: Get: delete the user from db
-func (h *userHandler) deleteUser(rw http.ResponseWriter, r *http.Request) {
+func (h *userHandler) deleteUser(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 
 	login := fmt.Sprint(r.URL.Query().Get("login"))
 
-	err := h.serv.DB.UserCol.UpdateActive(login)
+	err := h.serv.DB.UserCol.UpdateActive(ctx, login)
 
 	if err != nil {
 
-		h.serv.writeResponse(rw, err.Error(), http.StatusBadRequest, nil)
+		h.serv.writeResponse(ctx, rw, err.Error(), http.StatusBadRequest, nil)
 
 		return
 	}
 
-	user, _ := h.serv.getUserFromClaimsFromCookie(r)
+	user, _ := h.serv.getUserFromClaimsFromCookie(ctx, r)
 
 	if login == user.Login {
 
-		h.serv.writeResponse(rw, "user active was updated and logged out", http.StatusOK, user)
+		h.serv.writeResponse(ctx, rw, "user active was updated and logged out", http.StatusOK, user)
 
 	} else {
 
-		h.serv.writeResponse(rw, "user active was updated", http.StatusOK, nil)
+		h.serv.writeResponse(ctx, rw, "user active was updated", http.StatusOK, nil)
 
 	}
 }

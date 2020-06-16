@@ -21,7 +21,7 @@ func New(config *Config) *Database {
 
 }
 
-//Open connects to db and ping it
+//Open connects to db
 func (c *Database) Open() error {
 
 	clientOptions := options.Client().ApplyURI(c.config.DatabaseURL)

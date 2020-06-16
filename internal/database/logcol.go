@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/anastasja-hunko/smptServer/internal/model"
 	"go.mongodb.org/mongo-driver/mongo"
+	"time"
 )
 
 type logCol struct {
@@ -16,11 +17,15 @@ func (db *Database) newLogCol() *logCol {
 
 }
 
-func (dc *logCol) Create(l *model.Log) error {
+func (dc *logCol) Create(ctx context.Context, l *model.Log) error {
+
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Millisecond)
+
+	defer cancel()
 
 	l.BeforeCreate()
 
-	_, err := dc.col.InsertOne(context.TODO(), l)
+	_, err := dc.col.InsertOne(ctx, l)
 	if err != nil {
 
 		return err
